@@ -39,6 +39,10 @@ contract EventContract {
       }
   }
 
+  function withdraw_funds() external payable onlyOwner {
+      owner.transfer(address(this).balance);
+  }
+
   function get_tickets(address customer) external view onlyOwner returns (uint) {
       return tickets[customer].num_tickets;
   }
