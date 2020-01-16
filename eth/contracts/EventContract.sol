@@ -32,7 +32,11 @@ contract EventContract {
       }
       tickets[msg.sender].num_tickets += requested_num_tickets;
       available_tickets -= requested_num_tickets;
-      // TODO: Should return excessive ether
+
+      // Return excessive funds
+      if(msg.value > requested_num_tickets*ticket_price) {
+          msg.sender.transfer(msg.value - requested_num_tickets*ticket_price);
+      }
   }
 
   function get_tickets(address customer) external view onlyOwner returns (uint) {
