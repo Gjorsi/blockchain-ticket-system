@@ -1,9 +1,9 @@
-pragma solidity >=0.4.21 <0.7.0;
+pragma solidity ^0.5.12;
 
-contract TestEvent {
-  address payable owner;
-  uint available_tickets;
-  uint ticket_price;
+contract EventContract {
+  address payable private owner;
+  uint public available_tickets;
+  uint public ticket_price;
   mapping(address => Customer) private tickets;
   address[] private customers;
 
@@ -23,16 +23,16 @@ contract TestEvent {
     _;
   }
 
-  function buy_tickets(uint num_tickets) external payable {
-      require(num_tickets <= available_tickets, "Not enough tickets available");
-      require(msg.value >= num_tickets*ticket_price, "Not enough ether was sent.");
+  function buy_tickets(uint requested_num_tickets) external payable {
+      require(requested_num_tickets <= available_tickets, "Not enough tickets available");
+      require(msg.value >= requested_num_tickets*ticket_price, "Not enough ether was sent.");
       if(tickets[msg.sender].num_tickets == 0){
           tickets[msg.sender].addr = msg.sender;
           customers.push(msg.sender);
       }
-      tickets[msg.sender].num_tickets += num_tickets;
-      available_tickets -= num_tickets;
-      // Should return excessive ether
+      tickets[msg.sender].num_tickets += requested_num_tickets;
+      available_tickets -= requested_num_tickets;
+      // TODO: Should return excessive ether
   }
 
   function get_tickets(address customer) external view onlyOwner returns (uint) {
@@ -41,7 +41,7 @@ contract TestEvent {
 
   function get_customers() external view onlyOwner
         returns (address[] memory, uint[] memory) {
-    // TODO: Find a cheaper way
+    // TODO: Find a cheaper way (for-loops are potentially expensive)
     uint[] memory num_tickets = new uint[](customers.length);
     for(uint i = 0; i < customers.length; i++) {
         num_tickets[i] = tickets[customers[i]].num_tickets;
