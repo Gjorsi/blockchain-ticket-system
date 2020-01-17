@@ -19,7 +19,7 @@ contract EventContract {
   }
 
   modifier onlyOwner {
-    require(msg.sender == owner, "Only owner can call this function.");
+    require(msg.sender == owner, "Sender was not authorized to call this function.");
     _;
   }
 
