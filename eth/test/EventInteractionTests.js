@@ -55,9 +55,10 @@ contract('EventContract', (accounts) => {
       await eventC.withdraw_funds({from:buyer});
       assert.fail("Unauthorized address was allowed to call withdraw_funds");
     } catch (error) {
-      if(error.message.search('Sender was not authorized') < 0) {
-        assert.fail("Unknown error from transaction:");
-        console.log(`   ${error.message}`);
+      if(error.message.search('User was not authorized') > -1) {
+        // correct outcome, test should pass
+      } else {
+        assert.fail(error.message);
       }
     }
   });
