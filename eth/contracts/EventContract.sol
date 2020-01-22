@@ -60,7 +60,7 @@ contract EventContract {
   function buy_tickets(uint requested_num_tickets) external payable {
       require(requested_num_tickets <= available_tickets, "Not enough tickets available");
       require(msg.value >= requested_num_tickets*ticket_price, "Not enough ether was sent.");
-      require(sale_active, "Ticket sale is closed by owner.");
+      require(sale_active, "Ticket sale is closed by seller.");
 
       if(tickets[msg.sender].num_tickets == 0){
           tickets[msg.sender].addr = msg.sender;

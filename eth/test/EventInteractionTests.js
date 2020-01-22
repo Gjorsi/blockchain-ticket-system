@@ -43,9 +43,10 @@ contract('EventContract', (accounts) => {
       await eventC.buy_tickets(tickets_to_buy, {from:buyer, value:amount});
       assert.fail("Attempt to buy ticket at less than actual price succeeded");
     } catch (error) {
-      if(error.message.search('Not enough ether was sent') < 0) {
-        assert.fail("Unknown error from transaction:");
-        console.log(`   ${error.message}`);
+      if(error.message.search('Not enough ether was sent') > -1) {
+        // correct outcome, test should pass
+      } else {
+        assert.fail(error.message);
       }
     }
   });
@@ -61,5 +62,33 @@ contract('EventContract', (accounts) => {
         assert.fail(error.message);
       }
     }
+  });
+
+  it('Stop and continue sale', async () => {
+    await eventC.stop_sale({from:owner});
+    let _sale_active = await eventC.sale_active();
+    assert.equal(_sale_active, false);
+
+    try {
+      await eventC.buy_tickets(1, {from:buyer, value:ticket_price})
+      assert.fail("Ticket sale was not stopped");
+    } catch (error) {
+      if(error.message.search('Ticket sale is closed by seller') > -1) {
+        // correct outcome, test should pass
+      } else {
+        assert.fail(error.message);
+      }
+    }
+
+    await eventC.continue_sale({from:owner});
+    _sale_active = await eventC.sale_active();
+    assert.equal(_sale_active, true);
+  });
+
+  it('Add tickets', async () => {
+    let _n_tickets = parseFloat(await eventC.available_tickets());
+    await eventC.add_tickets(10, {from:owner});
+    let new_n_tickets = parseFloat(await eventC.available_tickets());
+    assert.equal(_n_tickets+10, new_n_tickets);
   });
 });
