@@ -91,4 +91,18 @@ contract('EventContract', (accounts) => {
     let new_n_tickets = parseFloat(await eventC.available_tickets());
     assert.equal(_n_tickets+10, new_n_tickets);
   });
+
+  it('Attempt to steal tickets using integer overflow', async () => {
+    // 2^63 = 9223372036854775808
+    let contract = await EventContract.new('9223372036854775808', '2');
+    try {
+      // num_tickets*ticket_price = 2^63 * 2 = 2^64, which will overflow to 0 when using uint64
+      await contract.buy_tickets('9223372036854775808', { from: accounts[4], value: 1 });
+      assert.fail('Was able to buy 2^63 tickets for only 1 wei');
+    } catch (error) {
+      if(error.message.search('Not enough ether was sent') < 0) {
+        throw error;
+      }
+    }
+  });
 });
