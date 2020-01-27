@@ -6,7 +6,6 @@ contract('EventContract', (accounts) => {
   const eth = 1e18; //1 eth in wei units
   const ticket_price = 1e16; // 0.01 eth
   let receipt = [];
-  let gasPrice = [];
   let buyer = accounts[1];
   const owner = accounts[0];
 
@@ -15,21 +14,21 @@ contract('EventContract', (accounts) => {
     //balance_before = parseFloat(await web3.eth.getBalance(accounts[1]));
     let actual_n_tickets = await eventC.available_tickets();
     let actual_ticket_price = await eventC.ticket_price();
-    console.log(`   Available tickets: ${actual_n_tickets}`);
-    console.log(`   Ticket price: ${parseFloat(actual_ticket_price)}`);
+    console.log(`     Available tickets: ${actual_n_tickets}`);
+    console.log(`     Ticket price: ${parseFloat(actual_ticket_price)}`);
   })
 
   it('Attempt to buy tickets', async () => {
     let tickets_to_buy = 1;
     receipt.push(await eventC.buy_tickets(tickets_to_buy, {from:buyer, value:ticket_price}));
-    console.log(`   Gas used to buy ${tickets_to_buy} ticket(s): ${receipt[0].receipt.gasUsed}`);
+    console.log(`     Gas used to buy ${tickets_to_buy} ticket(s): ${receipt[0].receipt.gasUsed}`);
 
     let buyers_tickets = await eventC.get_tickets(buyer, {from:owner});
     assert.equal(buyers_tickets, tickets_to_buy);
 
     tickets_to_buy = 5;
     receipt.push(await eventC.buy_tickets(tickets_to_buy, {from:buyer, value:ticket_price*tickets_to_buy}));
-    console.log(`   Gas used to buy ${tickets_to_buy} ticket(s): ${receipt[1].receipt.gasUsed}`);
+    console.log(`     Gas used to buy ${tickets_to_buy} ticket(s): ${receipt[1].receipt.gasUsed}`);
 
     buyers_tickets = await eventC.get_tickets(buyer, {from:owner});
     assert.equal(buyers_tickets, tickets_to_buy+1);
@@ -59,7 +58,7 @@ contract('EventContract', (accounts) => {
       if(error.message.search('User was not authorized') > -1) {
         // correct outcome, test should pass
       } else {
-        assert.fail(error.message);
+        throw error;
       }
     }
   });
