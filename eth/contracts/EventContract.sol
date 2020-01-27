@@ -3,17 +3,19 @@ pragma solidity ^0.5.12;
 contract EventContract {
   address payable private owner;
   uint64 public available_tickets;
-  uint64 public ticket_price;
+  uint128 public ticket_price;
   bool public sale_active = true;
+  bool public buyback_active = true;
   mapping(address => Customer) private tickets;
   address[] private customers;
 
   struct Customer {
       address addr;
       uint64 num_tickets;
+      uint128 total_paid;
   }
 
-  constructor(uint64 num_tickets, uint64 _ticket_price) public {
+  constructor(uint64 num_tickets, uint128 _ticket_price) public {
     available_tickets = num_tickets;
     ticket_price = _ticket_price;
     owner = msg.sender;
@@ -27,11 +29,12 @@ contract EventContract {
   }
 
   function withdraw_funds() external payable onlyOwner {
-      owner.transfer(address(this).balance);
+    buyback_active = false;
+    owner.transfer(address(this).balance);
   }
 
   function get_tickets(address customer) external view onlyOwner returns (uint64) {
-      return tickets[customer].num_tickets;
+    return tickets[customer].num_tickets;
   }
 
   function get_customers() external view onlyOwner
@@ -62,20 +65,49 @@ contract EventContract {
 // ----- Public functions -----
 
   function buy_tickets(uint64 requested_num_tickets) external payable {
-      require(requested_num_tickets <= available_tickets, "Not enough tickets available");
-      require(msg.value >= uint128(requested_num_tickets)*uint128(ticket_price), "Not enough ether was sent.");
-      require(sale_active, "Ticket sale is closed by seller.");
+    require(requested_num_tickets <= available_tickets, "Not enough tickets available");
+    uint128 sum_price = uint128(requested_num_tickets)*uint128(ticket_price);
+    require(msg.value >= sum_price, "Not enough ether was sent.");
+    require(sale_active, "Ticket sale is closed by seller.");
 
-      if(tickets[msg.sender].num_tickets == 0){
-          tickets[msg.sender].addr = msg.sender;
-          customers.push(msg.sender);
-      }
-      tickets[msg.sender].num_tickets += requested_num_tickets;
-      available_tickets -= requested_num_tickets;
+    if(tickets[msg.sender].num_tickets == 0) {
+      tickets[msg.sender].addr = msg.sender;
+      customers.push(msg.sender);
+    }
+    tickets[msg.sender].num_tickets += requested_num_tickets;
+    tickets[msg.sender].total_paid += sum_price;
+    available_tickets -= requested_num_tickets;
 
-      // Return excessive funds
-      if(msg.value > requested_num_tickets*ticket_price) {
-          msg.sender.transfer(msg.value - requested_num_tickets*ticket_price);
+    // Return excessive funds
+    if(msg.value > sum_price) {
+      msg.sender.transfer(msg.value - sum_price);
+    }
+  }
+
+  function return_tickets() external {
+    require(tickets[msg.sender].num_tickets > 0, "User does not own any tickets.");
+    require(buyback_active, "Ticket buyback has been deactivated by owner.");
+    require(sale_active, "Ticket sale is locked, which disables buyback.");
+
+    uint return_amount = tickets[msg.sender].total_paid;
+    available_tickets += tickets[msg.sender].num_tickets;
+    delete_customer(msg.sender);
+
+    msg.sender.transfer(return_amount);
+  }
+
+// ----- Internal functions -----
+
+  function delete_customer(address customer_addr) internal {
+    delete tickets[customer_addr];
+    for(uint64 i = 0; i < customers.length; i++) {
+      if (customers[i] == customer_addr) {
+        // replace with last element in array and reduce its length by 1 to avoid gaps
+        customers[i] = customers[customers.length-1];
+        delete customers[customers.length-1];
+        customers.length--;
+        break;
       }
+    }
   }
 }
