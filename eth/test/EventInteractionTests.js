@@ -50,6 +50,24 @@ contract('EventContract', (accounts) => {
     }
   });
 
+  it('Attempt to buy a ticket with excessive amount', async () => {
+    buyer = accounts[3];
+    let balance_before = BigInt(await web3.eth.getBalance(buyer));
+    let tickets_to_buy = 1;
+    let amount = 2*ticket_price;
+    try {
+      let rcpt = await eventC.buy_tickets(tickets_to_buy, {from:buyer, value:amount});
+      let tx = await web3.eth.getTransaction(rcpt.tx);
+      let total_gas_cost = tx.gasPrice*rcpt.receipt.gasUsed;
+
+      let expected_balance = balance_before - BigInt(ticket_price) - BigInt(total_gas_cost);
+      let balance_after = BigInt(await web3.eth.getBalance(buyer));
+      assert.equal(expected_balance, balance_after);
+    } catch (error) {
+      assert.fail(error.message);
+    }
+  });
+
   it('Attempt to withdraw funds from unauthorized address', async () => {
     try {
       await eventC.withdraw_funds({from:buyer});
