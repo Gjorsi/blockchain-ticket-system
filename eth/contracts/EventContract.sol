@@ -30,7 +30,8 @@ contract EventContract {
 
   function withdraw_funds() external payable onlyOwner {
     buyback_active = false;
-    owner.transfer(address(this).balance);
+    (bool success, ) = owner.call.value(address(this).balance)("");
+    require(success, "Withdrawal transfer failed.");
   }
 
   function get_tickets(address customer) external view onlyOwner returns (uint64) {
@@ -80,7 +81,8 @@ contract EventContract {
 
     // Return excessive funds
     if(msg.value > sum_price) {
-      msg.sender.transfer(msg.value - sum_price);
+      (bool success, ) = msg.sender.call.value(msg.value - sum_price)("");
+      require(success, "Return transfer failed.");
     }
   }
 
@@ -91,9 +93,10 @@ contract EventContract {
 
     uint return_amount = tickets[msg.sender].total_paid;
     available_tickets += tickets[msg.sender].num_tickets;
-    delete_customer(msg.sender);
+    delete_customer(msg.sender); // Necessary? Could potentially just set num_tickets = 0
 
-    msg.sender.transfer(return_amount);
+    (bool success, ) = msg.sender.call.value(return_amount)("");
+    require(success, "Transfer failed.");
   }
 
 // ----- Internal functions -----
