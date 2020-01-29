@@ -11,10 +11,9 @@ contract('EventContract', (accounts) => {
   let gas = {}
 
   it('Measure gas usage', async () => {
-    let balance_before = await web3.eth.getBalance(accounts[0]);
     eventC = await EventContract.new(100, String(ticket_price));
-    let balance_after = await web3.eth.getBalance(accounts[0]);
-    gas['constructor'] = balance_before - balance_after;
+    let tx = await web3.eth.getTransactionReceipt(eventC.transactionHash);
+    gas['constructor'] = tx.gasUsed;
 
     let tickets_to_buy = 1;
 
