@@ -6,7 +6,7 @@ contract('EventContract', (accounts) => {
   const ticket_price = 1e16; // 0.01 eth
   let receipt = [];
   let gasPrice = [];
-  let buyer = accounts[10];
+  let buyer = accounts[1];
   const owner = accounts[0];
 
   it('Setup', async () => {
@@ -21,7 +21,7 @@ contract('EventContract', (accounts) => {
   it('Attempt to buy and return tickets', async () => {
     let tickets_to_buy = 2;
     let tickets_available_before = parseFloat(await eventC.available_tickets());
-    let balance_before = parseFloat(await web3.eth.getBalance(buyer));
+    let balance_before = BigInt(await web3.eth.getBalance(buyer));
     receipt.push(await eventC.buy_tickets(tickets_to_buy, {from:buyer, value:ticket_price*2}));
     console.log(`     Gas used to buy ${tickets_to_buy} ticket(s): ${receipt[0].receipt.gasUsed}`);
 
@@ -42,9 +42,8 @@ contract('EventContract', (accounts) => {
 
     tx = await web3.eth.getTransaction(receipt[1].tx);
     total_gas_cost += tx.gasPrice*receipt[1].receipt.gasUsed;
-    let balance_after = parseFloat(await web3.eth.getBalance(buyer));
-    assert.equal(balance_before.toFixed(15), (balance_after+total_gas_cost).toFixed(15));
-    // using only the first 15 digits due to js float imprecision
+    let balance_after = BigInt(await web3.eth.getBalance(buyer));
+    assert.equal(balance_before, balance_after+BigInt(total_gas_cost));
 
   });
 
