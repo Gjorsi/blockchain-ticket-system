@@ -63,6 +63,10 @@ contract EventContract {
     available_tickets += additional_tickets;
   }
 
+  function change_ticket_price(uint128 new_price) external onlyOwner {
+      ticket_price = new_price;
+  }
+
 // ----- Public functions -----
 
   function buy_tickets(uint64 requested_num_tickets) external payable {
