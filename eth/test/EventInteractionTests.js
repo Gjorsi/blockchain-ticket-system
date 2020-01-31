@@ -109,6 +109,13 @@ contract('EventContract', (accounts) => {
     assert.equal(_n_tickets+10, new_n_tickets);
   });
 
+  it('Change ticket price', async () => {
+    let old_ticket_price = BigInt(await eventC.ticket_price())
+    await eventC.change_ticket_price((old_ticket_price + BigInt(1e16)).toString(), {from:owner});
+    let new_ticket_price = BigInt(await eventC.ticket_price());
+    assert.equal(old_ticket_price+BigInt(1e16), new_ticket_price);
+  });
+
   it('Attempt to steal tickets using integer overflow', async () => {
     // 2^63 = 9223372036854775808
     let contract = await EventContract.new('9223372036854775808', '2', false, '0');
