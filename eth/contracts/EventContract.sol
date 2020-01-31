@@ -132,6 +132,28 @@ contract EventContract {
     require(success, "Return transfer to customer failed.");
   }
 
+  function get_event_info(uint64 event_id) external view returns (
+    uint64 eventid,
+    address owner,
+    uint64 available_tickets,
+    uint64 max_per_customer,
+    uint128 ticket_price,
+    bool sale_active,
+    bool buyback_active,
+    bool per_customer_limit) {
+      require(event_id < current_id, "Event does not exist");
+      Event memory e = events[event_id];
+      return (
+        e.event_id,
+        e.owner,
+        e.available_tickets,
+        e.max_per_customer,
+        e.ticket_price,
+        e.sale_active,
+        e.buyback_active,
+        e.per_customer_limit);
+    }
+
 // ----- Internal functions -----
 
   function delete_customer(uint64 event_id, address customer_addr) internal {
