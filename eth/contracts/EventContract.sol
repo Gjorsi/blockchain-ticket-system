@@ -3,9 +3,11 @@ pragma solidity ^0.5.12;
 contract EventContract {
   address payable private owner;
   uint64 public available_tickets;
+  uint64 public max_per_customer;
   uint128 public ticket_price;
   bool public sale_active = true;
   bool public buyback_active = true;
+  bool public per_customer_limit;
   mapping(address => Customer) private tickets;
   address[] private customers;
 
@@ -15,9 +17,14 @@ contract EventContract {
       uint128 total_paid;
   }
 
-  constructor(uint64 num_tickets, uint128 _ticket_price) public {
+  constructor(uint64 num_tickets,
+    uint128 _ticket_price,
+    bool _per_customer_limit,
+    uint64 _max_per_customer) public {
     available_tickets = num_tickets;
     ticket_price = _ticket_price;
+    max_per_customer = _max_per_customer;
+    per_customer_limit = _per_customer_limit;
     owner = msg.sender;
   }
 
@@ -66,7 +73,10 @@ contract EventContract {
 // ----- Public functions -----
 
   function buy_tickets(uint64 requested_num_tickets) external payable {
-    require(requested_num_tickets <= available_tickets, "Not enough tickets available");
+    require(requested_num_tickets <= available_tickets,
+      "Not enough tickets available.");
+    require(!per_customer_limit || (tickets[msg.sender].num_tickets + requested_num_tickets <= max_per_customer),
+      "Purchase surpasses max per customer.");
     uint128 sum_price = uint128(requested_num_tickets)*uint128(ticket_price);
     require(msg.value >= sum_price, "Not enough ether was sent.");
     require(sale_active, "Ticket sale is closed by seller.");
@@ -82,7 +92,7 @@ contract EventContract {
     // Return excessive funds
     if(msg.value > sum_price) {
       (bool success, ) = msg.sender.call.value(msg.value - sum_price)("");
-      require(success, "Return transfer failed.");
+      require(success, "Return of excess funds to sender failed.");
     }
   }
 
@@ -96,7 +106,7 @@ contract EventContract {
     delete_customer(msg.sender); // Necessary? Could potentially just set num_tickets = 0
 
     (bool success, ) = msg.sender.call.value(return_amount)("");
-    require(success, "Transfer failed.");
+    require(success, "Return transfer to customer failed.");
   }
 
 // ----- Internal functions -----

@@ -7,11 +7,11 @@ contract('EventContract', (accounts) => {
   const ticket_price = 1e16; // 0.01 eth
   let buyer = accounts[1];
   const owner = accounts[0];
-  
+
   let gas = {}
 
   it('Measure gas usage', async () => {
-    eventC = await EventContract.new(100, String(ticket_price));
+    eventC = await EventContract.new(100, String(ticket_price), false, 0);
     let tx = await web3.eth.getTransactionReceipt(eventC.transactionHash);
     gas['constructor'] = tx.gasUsed;
 

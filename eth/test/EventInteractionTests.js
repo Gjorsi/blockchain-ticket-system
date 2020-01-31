@@ -111,7 +111,7 @@ contract('EventContract', (accounts) => {
 
   it('Attempt to steal tickets using integer overflow', async () => {
     // 2^63 = 9223372036854775808
-    let contract = await EventContract.new('9223372036854775808', '2');
+    let contract = await EventContract.new('9223372036854775808', '2', false, '0');
     try {
       // num_tickets*ticket_price = 2^63 * 2 = 2^64, which will overflow to 0 when using uint64
       await contract.buy_tickets('9223372036854775808', { from: accounts[4], value: 1 });

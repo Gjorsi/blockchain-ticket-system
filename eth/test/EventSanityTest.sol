@@ -8,11 +8,16 @@ contract EventSanityTest {
 
   uint64 ticket_price = 10000000000000000; // 0.01 eth
   uint64 n_tickets = 100;
+  uint64 max_per_customer = 5;
 
   function testInitialState() public {
-    EventContract eventC = new EventContract(n_tickets, ticket_price);
+    EventContract eventC = new EventContract(n_tickets, ticket_price, false, max_per_customer);
 
-    Assert.equal(uint(n_tickets), eventC.available_tickets(), "Available_tickets after deployment should be as initialised");
-    Assert.equal(uint(ticket_price), eventC.ticket_price(), "Ticket_price check after deployment should be as initialised");
+    Assert.equal(uint(n_tickets), eventC.available_tickets(),
+      "Available_tickets after deployment should be as initialised");
+    Assert.equal(uint(ticket_price), eventC.ticket_price(),
+      "Ticket_price check after deployment should be as initialised");
+    Assert.equal(uint(max_per_customer), eventC.max_per_customer(),
+      "max_per_customer check after deployment should be as initialised");
   }
 }
