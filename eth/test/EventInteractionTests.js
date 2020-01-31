@@ -3,43 +3,41 @@ const EventContract = artifacts.require("EventContract");
 contract('EventContract', (accounts) => {
 
   let eventC;
-  const eth = 1e18; //1 eth in wei units
-  const ticket_price = 1e16; // 0.01 eth
-  let receipt = [];
-  let buyer = accounts[1];
+  let events = [];
   const owner = accounts[0];
 
   it('Setup', async () => {
     eventC = await EventContract.deployed();
-    //balance_before = parseFloat(await web3.eth.getBalance(accounts[1]));
-    let actual_n_tickets = await eventC.available_tickets();
-    let actual_ticket_price = await eventC.ticket_price();
-    console.log(`     Available tickets: ${actual_n_tickets}`);
-    console.log(`     Ticket price: ${parseFloat(actual_ticket_price)}`);
-  })
+  });
+
+  it('Create event', async () => {
+    await eventC.create_event(1000, 1e16.toString(), false, 0, {from:owner});
+    events.push({ id: 0, num_tickets: 1000, ticket_price: 1e16, per_customer_limit: false, max_per_customer: 0, owner: owner});
+  });
 
   it('Attempt to buy tickets', async () => {
+    let buyer = accounts[1];
     let tickets_to_buy = 1;
-    receipt.push(await eventC.buy_tickets(tickets_to_buy, {from:buyer, value:ticket_price}));
-    console.log(`     Gas used to buy ${tickets_to_buy} ticket(s): ${receipt[0].receipt.gasUsed}`);
+    let purchase = await eventC.buy_tickets(events[0].id, tickets_to_buy, {from:buyer, value: events[0].ticket_price});
+    console.log(`     Gas used to buy ${tickets_to_buy} ticket(s): ${purchase.receipt.gasUsed}`);
 
-    let buyers_tickets = await eventC.get_tickets(buyer, {from:owner});
+    let buyers_tickets = await eventC.get_tickets(events[0].id, buyer, {from:owner});
     assert.equal(buyers_tickets, tickets_to_buy);
 
     tickets_to_buy = 5;
-    receipt.push(await eventC.buy_tickets(tickets_to_buy, {from:buyer, value:ticket_price*tickets_to_buy}));
-    console.log(`     Gas used to buy ${tickets_to_buy} ticket(s): ${receipt[1].receipt.gasUsed}`);
+    purchase = await eventC.buy_tickets(events[0].id, tickets_to_buy, {from: buyer, value: events[0].ticket_price*tickets_to_buy});
+    console.log(`     Gas used to buy ${tickets_to_buy} ticket(s): ${purchase.receipt.gasUsed}`);
 
-    buyers_tickets = await eventC.get_tickets(buyer, {from:owner});
+    buyers_tickets = await eventC.get_tickets(events[0].id, buyer, {from:owner});
     assert.equal(buyers_tickets, tickets_to_buy+1);
   });
 
   it('Attempt to buy a ticket with insufficient amount', async () => {
-    buyer = accounts[2];
+    let buyer = accounts[2];
     let tickets_to_buy = 1;
-    let amount = 5e15; // 0.005 eth
+    let amount = events[0].ticket_price / 2;
     try {
-      await eventC.buy_tickets(tickets_to_buy, {from:buyer, value:amount});
+      await eventC.buy_tickets(events[0].id, tickets_to_buy, {from:buyer, value:amount});
       assert.fail("Attempt to buy ticket at less than actual price succeeded");
     } catch (error) {
       if(error.message.search('Not enough ether was sent') > -1) {
@@ -51,16 +49,16 @@ contract('EventContract', (accounts) => {
   });
 
   it('Attempt to buy a ticket with excessive amount', async () => {
-    buyer = accounts[3];
+    let buyer = accounts[3];
     let balance_before = BigInt(await web3.eth.getBalance(buyer));
     let tickets_to_buy = 1;
-    let amount = 2*ticket_price;
+    let amount = 2*events[0].ticket_price;
     try {
-      let rcpt = await eventC.buy_tickets(tickets_to_buy, {from:buyer, value:amount});
+      let rcpt = await eventC.buy_tickets(events[0].id, tickets_to_buy, {from:buyer, value:amount});
       let tx = await web3.eth.getTransaction(rcpt.tx);
       let total_gas_cost = tx.gasPrice*rcpt.receipt.gasUsed;
 
-      let expected_balance = balance_before - BigInt(ticket_price) - BigInt(total_gas_cost);
+      let expected_balance = balance_before - BigInt(events[0].ticket_price) - BigInt(total_gas_cost);
       let balance_after = BigInt(await web3.eth.getBalance(buyer));
       assert.equal(expected_balance, balance_after);
     } catch (error) {
@@ -70,10 +68,10 @@ contract('EventContract', (accounts) => {
 
   it('Attempt to withdraw funds from unauthorized address', async () => {
     try {
-      await eventC.withdraw_funds({from:buyer});
+      await eventC.withdraw_funds(events[0].id, {from:accounts[9]});
       assert.fail("Unauthorized address was allowed to call withdraw_funds");
     } catch (error) {
-      if(error.message.search('User was not authorized') > -1) {
+      if(error.message.search('Sender is not the owner of this event') > -1) {
         // correct outcome, test should pass
       } else {
         throw error;
@@ -82,12 +80,12 @@ contract('EventContract', (accounts) => {
   });
 
   it('Stop and continue sale', async () => {
-    await eventC.stop_sale({from:owner});
-    let _sale_active = await eventC.sale_active();
+    await eventC.stop_sale(events[0].id, {from:events[0].owner});
+    let _sale_active = (await eventC.get_event_info(events[0].id)).sale_active;
     assert.equal(_sale_active, false);
 
     try {
-      await eventC.buy_tickets(1, {from:buyer, value:ticket_price})
+      await eventC.buy_tickets(events[0].id, 1, {from:accounts[4], value:events[0].ticket_price})
       assert.fail("Ticket sale was not stopped");
     } catch (error) {
       if(error.message.search('Ticket sale is closed by seller') > -1) {
@@ -97,36 +95,22 @@ contract('EventContract', (accounts) => {
       }
     }
 
-    await eventC.continue_sale({from:owner});
-    _sale_active = await eventC.sale_active();
+    await eventC.continue_sale(events[0].id, {from:events[0].owner});
+    _sale_active = (await eventC.get_event_info(events[0].id)).sale_active;
     assert.equal(_sale_active, true);
   });
 
   it('Add tickets', async () => {
-    let _n_tickets = parseFloat(await eventC.available_tickets());
-    await eventC.add_tickets(10, {from:owner});
-    let new_n_tickets = parseFloat(await eventC.available_tickets());
+    let _n_tickets = parseFloat((await eventC.get_event_info(events[0].id)).available_tickets);
+    await eventC.add_tickets(events[0].id, 10, {from:events[0].owner});
+    let new_n_tickets = parseFloat((await eventC.get_event_info(events[0].id)).available_tickets);
     assert.equal(_n_tickets+10, new_n_tickets);
   });
 
   it('Change ticket price', async () => {
-    let old_ticket_price = BigInt(await eventC.ticket_price())
-    await eventC.change_ticket_price((old_ticket_price + BigInt(1e16)).toString(), {from:owner});
-    let new_ticket_price = BigInt(await eventC.ticket_price());
+    let old_ticket_price = BigInt((await eventC.get_event_info(events[0].id)).ticket_price);
+    await eventC.change_ticket_price(events[0].id, (old_ticket_price + BigInt(1e16)).toString(), {from:owner});
+    let new_ticket_price = BigInt((await eventC.get_event_info(events[0].id)).ticket_price);
     assert.equal(old_ticket_price+BigInt(1e16), new_ticket_price);
-  });
-
-  it('Attempt to steal tickets using integer overflow', async () => {
-    // 2^63 = 9223372036854775808
-    let contract = await EventContract.new('9223372036854775808', '2', false, '0');
-    try {
-      // num_tickets*ticket_price = 2^63 * 2 = 2^64, which will overflow to 0 when using uint64
-      await contract.buy_tickets('9223372036854775808', { from: accounts[4], value: 1 });
-      assert.fail('Was able to buy 2^63 tickets for only 1 wei');
-    } catch (error) {
-      if(error.message.search('Not enough ether was sent') < 0) {
-        throw error;
-      }
-    }
   });
 });

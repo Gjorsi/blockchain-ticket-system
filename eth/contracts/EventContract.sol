@@ -133,7 +133,7 @@ contract EventContract {
   }
 
   function get_event_info(uint64 event_id) external view returns (
-    uint64 eventid,
+    uint64 id,
     address owner,
     uint64 available_tickets,
     uint64 max_per_customer,
