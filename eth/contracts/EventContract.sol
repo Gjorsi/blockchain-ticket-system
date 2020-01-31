@@ -1,97 +1,116 @@
 pragma solidity ^0.5.12;
 
 contract EventContract {
-  address payable private owner;
-  uint64 public available_tickets;
-  uint64 public max_per_customer;
-  uint128 public ticket_price;
-  bool public sale_active = true;
-  bool public buyback_active = true;
-  bool public per_customer_limit;
-  mapping(address => Customer) private tickets;
-  address[] private customers;
+  // Mapping from event id to event
+  mapping(uint64 => Event) public events;
+  uint64 public current_id;
+
+  struct Event {
+    uint64 event_id;
+    uint128 funds;
+    address payable owner;
+    uint64 available_tickets;
+    uint64 max_per_customer;
+    uint128 ticket_price;
+    bool sale_active;
+    bool buyback_active;
+    bool per_customer_limit;
+    mapping(address => Customer) tickets;
+    address[] customers;
+  }
 
   struct Customer {
-      address addr;
-      uint64 num_tickets;
-      uint128 total_paid;
+    address addr;
+    uint64 num_tickets;
+    uint128 total_paid;
   }
+  
+// ----- Event host functions -----
 
-  constructor(uint64 num_tickets,
-    uint128 _ticket_price,
-    bool _per_customer_limit,
-    uint64 _max_per_customer) public {
-    available_tickets = num_tickets;
-    ticket_price = _ticket_price;
-    max_per_customer = _max_per_customer;
-    per_customer_limit = _per_customer_limit;
-    owner = msg.sender;
-  }
-
-// ----- Owner functions -----
-
-  modifier onlyOwner {
-    require(msg.sender == owner, "User was not authorized to call this function.");
+  modifier onlyHost(uint64 event_id){
+    require(events[event_id].owner == msg.sender, "Sender is not the owner of this event");
     _;
   }
 
-  function withdraw_funds() external payable onlyOwner {
-    buyback_active = false;
-    (bool success, ) = owner.call.value(address(this).balance)("");
+  function create_event(uint64 num_tickets,
+    uint128 _ticket_price,
+    bool _per_customer_limit,
+    uint64 _max_per_customer) external returns (uint64) {
+    events[current_id].event_id = current_id;
+    events[current_id].available_tickets = num_tickets;
+    events[current_id].ticket_price = _ticket_price;
+    events[current_id].max_per_customer = _max_per_customer;
+    events[current_id].per_customer_limit = _per_customer_limit;
+    events[current_id].owner = msg.sender;
+    events[current_id].sale_active = true;
+    events[current_id].buyback_active = true;
+    return current_id++;
+  }
+
+  function withdraw_funds(uint64 event_id) external payable onlyHost(event_id) {
+    events[event_id].buyback_active = false;
+    uint128 withdraw_amount = events[event_id].funds; 
+    events[event_id].funds = 0;
+
+    (bool success, ) = events[event_id].owner.call.value(withdraw_amount)("");
     require(success, "Withdrawal transfer failed.");
   }
 
-  function get_tickets(address customer) external view onlyOwner returns (uint64) {
-    return tickets[customer].num_tickets;
+  function get_tickets(uint64 event_id, address customer) external view returns (uint64) {
+    return events[event_id].tickets[customer].num_tickets;
   }
 
-  function get_customers() external view onlyOwner
+  function get_customers(uint64 event_id) external view
         returns (address[] memory, uint64[] memory) {
-    uint64[] memory num_tickets = new uint64[](customers.length);
-    for(uint64 i = 0; i < customers.length; i++) {
-        num_tickets[i] = tickets[customers[i]].num_tickets;
+    uint256 n_customers = events[event_id].customers.length;
+    uint64[] memory num_tickets = new uint64[](n_customers);
+    for(uint64 i = 0; i < n_customers; i++) {
+        num_tickets[i] = events[event_id]
+                          .tickets[events[event_id].customers[i]]
+                          .num_tickets;
     }
-    return (customers, num_tickets);
+    return (events[event_id].customers, num_tickets);
   }
 
-  function stop_sale() external onlyOwner {
-    sale_active = false;
+  function stop_sale(uint64 event_id) external onlyHost(event_id) {
+    events[event_id].sale_active = false;
   }
 
-  function continue_sale() external onlyOwner {
-    sale_active = true;
+  function continue_sale(uint64 event_id) external onlyHost(event_id) {
+    events[event_id].sale_active = true;
   }
 
-  function add_tickets(uint64 additional_tickets) external onlyOwner {
+  function add_tickets(uint64 event_id, uint64 additional_tickets) external onlyHost(event_id) {
     // Check for integer overflow
-    require(available_tickets + additional_tickets > available_tickets,
+    require(events[event_id].available_tickets + additional_tickets > events[event_id].available_tickets,
             "Cannot exceed 2^64-1 tickets");
-
-    available_tickets += additional_tickets;
+    events[event_id].available_tickets += additional_tickets;
   }
 
-  function change_ticket_price(uint128 new_price) external onlyOwner {
-      ticket_price = new_price;
+  function change_ticket_price(uint64 event_id, uint128 new_price) external onlyHost(event_id) {
+    events[event_id].ticket_price = new_price;
   }
 
 // ----- Public functions -----
 
-  function buy_tickets(uint64 requested_num_tickets) external payable {
-    require(requested_num_tickets <= available_tickets,
+  function buy_tickets(uint64 event_id, uint64 requested_num_tickets) external payable {
+    require(requested_num_tickets <= events[event_id].available_tickets,
       "Not enough tickets available.");
-    require(!per_customer_limit || (tickets[msg.sender].num_tickets + requested_num_tickets <= max_per_customer),
+    require(!events[event_id].per_customer_limit || 
+      (events[event_id].tickets[msg.sender].num_tickets + requested_num_tickets <= events[event_id].max_per_customer),
       "Purchase surpasses max per customer.");
-    uint128 sum_price = uint128(requested_num_tickets)*uint128(ticket_price);
+    uint128 sum_price = uint128(requested_num_tickets)*uint128(events[event_id].ticket_price);
     require(msg.value >= sum_price, "Not enough ether was sent.");
-    require(sale_active, "Ticket sale is closed by seller.");
+    require(events[event_id].sale_active, "Ticket sale is closed by seller.");
 
-    if(tickets[msg.sender].num_tickets == 0) {
-      tickets[msg.sender].addr = msg.sender;
-      customers.push(msg.sender);
+    if(events[event_id].tickets[msg.sender].num_tickets == 0) {
+      events[event_id].tickets[msg.sender].addr = msg.sender;
+      events[event_id].customers.push(msg.sender);
     }
-    tickets[msg.sender].num_tickets += requested_num_tickets;
-    tickets[msg.sender].total_paid += sum_price;
-    available_tickets -= requested_num_tickets;
+    events[event_id].tickets[msg.sender].num_tickets += requested_num_tickets;
+    events[event_id].tickets[msg.sender].total_paid += sum_price;
+    events[event_id].available_tickets -= requested_num_tickets;
+    events[event_id].funds += sum_price;
 
     // Return excessive funds
     if(msg.value > sum_price) {
@@ -100,14 +119,14 @@ contract EventContract {
     }
   }
 
-  function return_tickets() external {
-    require(tickets[msg.sender].num_tickets > 0, "User does not own any tickets.");
-    require(buyback_active, "Ticket buyback has been deactivated by owner.");
-    require(sale_active, "Ticket sale is locked, which disables buyback.");
+  function return_tickets(uint64 event_id) external {
+    require(events[event_id].tickets[msg.sender].num_tickets > 0, "User does not own any tickets.");
+    require(events[event_id].buyback_active, "Ticket buyback has been deactivated by owner.");
+    require(events[event_id].sale_active, "Ticket sale is locked, which disables buyback.");
 
-    uint return_amount = tickets[msg.sender].total_paid;
-    available_tickets += tickets[msg.sender].num_tickets;
-    delete_customer(msg.sender); // Necessary? Could potentially just set num_tickets = 0
+    uint return_amount = events[event_id].tickets[msg.sender].total_paid;
+    events[event_id].available_tickets += events[event_id].tickets[msg.sender].num_tickets;
+    delete_customer(event_id, msg.sender); // Necessary? Could potentially just set num_tickets = 0
 
     (bool success, ) = msg.sender.call.value(return_amount)("");
     require(success, "Return transfer to customer failed.");
@@ -115,14 +134,14 @@ contract EventContract {
 
 // ----- Internal functions -----
 
-  function delete_customer(address customer_addr) internal {
-    delete tickets[customer_addr];
-    for(uint64 i = 0; i < customers.length; i++) {
-      if (customers[i] == customer_addr) {
+  function delete_customer(uint64 event_id, address customer_addr) internal {
+    delete events[event_id].tickets[customer_addr];
+    for(uint64 i = 0; i < events[event_id].customers.length; i++) {
+      if (events[event_id].customers[i] == customer_addr) {
         // replace with last element in array and reduce its length by 1 to avoid gaps
-        customers[i] = customers[customers.length-1];
-        delete customers[customers.length-1];
-        customers.length--;
+        events[event_id].customers[i] = events[event_id].customers[events[event_id].customers.length-1];
+        delete events[event_id].customers[events[event_id].customers.length-1];
+        events[event_id].customers.length--;
         break;
       }
     }
