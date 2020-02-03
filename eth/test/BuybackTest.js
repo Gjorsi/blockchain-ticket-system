@@ -1,6 +1,6 @@
 const EventContract = artifacts.require("EventContract");
 
-contract('EventContract', (accounts) => {
+contract('EventContract - Buyback tests', (accounts) => {
   let eventC;
   let events = [];
   const owner = accounts[0];
@@ -10,8 +10,10 @@ contract('EventContract', (accounts) => {
   });
 
   it('Create event', async () => {
-    await eventC.create_event(1000, 1e16.toString(), false, 0, {from:owner});
-    events.push({ id: 0, num_tickets: 1000, ticket_price: 1e16, per_customer_limit: false, max_per_customer: 0, owner: owner});
+    let id = web3.utils.asciiToHex("TestEvent1");
+    let title = web3.utils.asciiToHex("This is the event title");
+    await eventC.create_event(id, title, 1000, 1e16.toString(), false, 0, {from:owner});
+    events.push({ id: id, num_tickets: 1000, ticket_price: 1e16, per_customer_limit: false, max_per_customer: 0, owner: owner});
   });
 
   it('Attempt to buy and return tickets', async () => {

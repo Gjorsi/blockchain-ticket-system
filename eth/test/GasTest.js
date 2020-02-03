@@ -1,6 +1,6 @@
 const EventContract = artifacts.require("EventContract");
 
-contract('EventContract', (accounts) => {
+contract('EventContract - Gas measurements', (accounts) => {
 
   let eventC;
   const eth = 1e18; //1 eth in wei units
@@ -14,8 +14,11 @@ contract('EventContract', (accounts) => {
   it('Measure gas usage', async () => {
     eventC = await EventContract.deployed();
 
-    let receipt = (await eventC.create_event(1000, ticket_price.toString(), false, 0, {from:owner})).receipt;
-    events.push({ id: 0, num_tickets: 1000, ticket_price: 1e16, per_customer_limit: false, max_per_customer: 0, owner: owner});
+    let id = web3.utils.asciiToHex("TestEvent3");
+    let title = web3.utils.asciiToHex("This is the event title");
+
+    let receipt = (await eventC.create_event(id, title, 1000, ticket_price.toString(), false, 0, {from:owner})).receipt;
+    events.push({ id: id, num_tickets: 1000, ticket_price: 1e16, per_customer_limit: false, max_per_customer: 0, owner: owner});
     gas['create_event'] = receipt.gasUsed;
 
     let tickets_to_buy = 1;

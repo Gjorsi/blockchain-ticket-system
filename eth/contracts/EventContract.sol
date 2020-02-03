@@ -32,12 +32,12 @@ contract EventContract {
     _;
   }
 
-// ----- Event host functions -----
-
   modifier onlyHost(bytes32 event_id){
     require(events[event_id].owner == msg.sender, "Sender is not the owner of this event");
     _;
   }
+
+// ----- Event host functions -----
 
   function create_event(bytes32 _event_id,
     bytes32 _title,
