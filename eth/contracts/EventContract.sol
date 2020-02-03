@@ -2,16 +2,18 @@ pragma solidity ^0.5.12;
 
 contract EventContract {
   // Mapping from event id to event
-  mapping(uint64 => Event) public events;
-  uint64 public current_id;
+  mapping(bytes32 => Event) public events;
+  bytes32[] public event_id_list;
 
   struct Event {
-    uint64 event_id;
+    bytes32 event_id;
+    bytes32 title;
     uint128 funds;
     address payable owner;
     uint64 available_tickets;
     uint64 max_per_customer;
     uint128 ticket_price;
+    bool exists;
     bool sale_active;
     bool buyback_active;
     bool per_customer_limit;
@@ -25,29 +27,40 @@ contract EventContract {
     uint128 total_paid;
   }
 
+  modifier eventExists(bytes32 event_id){
+    require(events[event_id].exists, "Event with given ID not found.");
+    _;
+  }
+
 // ----- Event host functions -----
 
-  modifier onlyHost(uint64 event_id){
+  modifier onlyHost(bytes32 event_id){
     require(events[event_id].owner == msg.sender, "Sender is not the owner of this event");
     _;
   }
 
-  function create_event(uint64 num_tickets,
+  function create_event(bytes32 _event_id,
+    bytes32 _title,
+    uint64 num_tickets,
     uint128 _ticket_price,
     bool _per_customer_limit,
-    uint64 _max_per_customer) external returns (uint64) {
-    events[current_id].event_id = current_id;
-    events[current_id].available_tickets = num_tickets;
-    events[current_id].ticket_price = _ticket_price;
-    events[current_id].max_per_customer = _max_per_customer;
-    events[current_id].per_customer_limit = _per_customer_limit;
-    events[current_id].owner = msg.sender;
-    events[current_id].sale_active = true;
-    events[current_id].buyback_active = true;
-    return current_id++;
+    uint64 _max_per_customer) external {
+      require(!events[_event_id].exists, "Given event ID is not unique - it is already in use.");
+      events[_event_id].exists = true;
+      events[_event_id].event_id = _event_id;
+      events[_event_id].title = _title;
+      events[_event_id].available_tickets = num_tickets;
+      events[_event_id].ticket_price = _ticket_price;
+      events[_event_id].max_per_customer = _max_per_customer;
+      events[_event_id].per_customer_limit = _per_customer_limit;
+      events[_event_id].owner = msg.sender;
+      events[_event_id].sale_active = true;
+      events[_event_id].buyback_active = true;
+      event_id_list.push(_event_id);
   }
 
-  function withdraw_funds(uint64 event_id) external payable onlyHost(event_id) {
+  function withdraw_funds(bytes32 event_id) external eventExists(event_id) onlyHost(event_id) {
+    require(events[event_id].exists, "Event with given ID not found.");
     events[event_id].buyback_active = false;
     uint128 withdraw_amount = events[event_id].funds;
     events[event_id].funds = 0;
@@ -56,11 +69,11 @@ contract EventContract {
     require(success, "Withdrawal transfer failed.");
   }
 
-  function get_tickets(uint64 event_id, address customer) external view returns (uint64) {
+  function get_tickets(bytes32 event_id, address customer) external view returns (uint64) {
     return events[event_id].tickets[customer].num_tickets;
   }
 
-  function get_customers(uint64 event_id) external view
+  function get_customers(bytes32 event_id) external view eventExists(event_id)
         returns (address[] memory, uint64[] memory) {
     uint256 n_customers = events[event_id].customers.length;
     uint64[] memory num_tickets = new uint64[](n_customers);
@@ -72,28 +85,28 @@ contract EventContract {
     return (events[event_id].customers, num_tickets);
   }
 
-  function stop_sale(uint64 event_id) external onlyHost(event_id) {
+  function stop_sale(bytes32 event_id) external eventExists(event_id) onlyHost(event_id) {
     events[event_id].sale_active = false;
   }
 
-  function continue_sale(uint64 event_id) external onlyHost(event_id) {
+  function continue_sale(bytes32 event_id) external eventExists(event_id) onlyHost(event_id) {
     events[event_id].sale_active = true;
   }
 
-  function add_tickets(uint64 event_id, uint64 additional_tickets) external onlyHost(event_id) {
+  function add_tickets(bytes32 event_id, uint64 additional_tickets) external eventExists(event_id) onlyHost(event_id) {
     // Check for integer overflow
     require(events[event_id].available_tickets + additional_tickets > events[event_id].available_tickets,
             "Cannot exceed 2^64-1 tickets");
     events[event_id].available_tickets += additional_tickets;
   }
 
-  function change_ticket_price(uint64 event_id, uint128 new_price) external onlyHost(event_id) {
+  function change_ticket_price(bytes32 event_id, uint128 new_price) external eventExists(event_id) onlyHost(event_id) {
     events[event_id].ticket_price = new_price;
   }
 
 // ----- Public functions -----
 
-  function buy_tickets(uint64 event_id, uint64 requested_num_tickets) external payable {
+  function buy_tickets(bytes32 event_id, uint64 requested_num_tickets) external payable {
     require(requested_num_tickets > 0);
     require(events[event_id].sale_active, "Ticket sale is closed by seller.");
     require(requested_num_tickets <= events[event_id].available_tickets,
@@ -120,7 +133,7 @@ contract EventContract {
     }
   }
 
-  function return_tickets(uint64 event_id) external {
+  function return_tickets(bytes32 event_id) external {
     require(events[event_id].tickets[msg.sender].num_tickets > 0, "User does not own any tickets.");
     require(events[event_id].buyback_active, "Ticket buyback has been deactivated by owner.");
     require(events[event_id].sale_active, "Ticket sale is locked, which disables buyback.");
@@ -133,8 +146,9 @@ contract EventContract {
     require(success, "Return transfer to customer failed.");
   }
 
-  function get_event_info(uint64 event_id) external view returns (
-    uint64 id,
+  function get_event_info(bytes32 event_id) external view eventExists(event_id) returns (
+    bytes32 id,
+    bytes32 title,
     address owner,
     uint64 available_tickets,
     uint64 max_per_customer,
@@ -142,10 +156,10 @@ contract EventContract {
     bool sale_active,
     bool buyback_active,
     bool per_customer_limit) {
-      require(event_id < current_id, "Event does not exist");
       Event memory e = events[event_id];
       return (
         e.event_id,
+        e.title,
         e.owner,
         e.available_tickets,
         e.max_per_customer,
@@ -157,7 +171,7 @@ contract EventContract {
 
 // ----- Internal functions -----
 
-  function delete_customer(uint64 event_id, address customer_addr) internal {
+  function delete_customer(bytes32 event_id, address customer_addr) internal {
     delete events[event_id].tickets[customer_addr];
     for(uint64 i = 0; i < events[event_id].customers.length; i++) {
       if (events[event_id].customers[i] == customer_addr) {
@@ -165,6 +179,19 @@ contract EventContract {
         events[event_id].customers[i] = events[event_id].customers[events[event_id].customers.length-1];
         delete events[event_id].customers[events[event_id].customers.length-1];
         events[event_id].customers.length--;
+        break;
+      }
+    }
+  }
+
+  function delete_event(bytes32 event_id) internal {
+    delete events[event_id];
+    for(uint64 i = 0; i < event_id_list.length; i++) {
+      if (event_id_list[i] == event_id) {
+        // replace with last element in array and reduce its length by 1 to avoid gaps
+        event_id_list[i] = event_id_list[event_id_list.length-1];
+        delete event_id_list[event_id_list.length-1];
+        event_id_list.length--;
         break;
       }
     }
