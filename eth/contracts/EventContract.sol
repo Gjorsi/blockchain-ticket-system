@@ -24,7 +24,7 @@ contract EventContract {
     uint64 num_tickets;
     uint128 total_paid;
   }
-  
+
 // ----- Event host functions -----
 
   modifier onlyHost(uint64 event_id){
@@ -49,7 +49,7 @@ contract EventContract {
 
   function withdraw_funds(uint64 event_id) external payable onlyHost(event_id) {
     events[event_id].buyback_active = false;
-    uint128 withdraw_amount = events[event_id].funds; 
+    uint128 withdraw_amount = events[event_id].funds;
     events[event_id].funds = 0;
 
     (bool success, ) = events[event_id].owner.call.value(withdraw_amount)("");
@@ -94,14 +94,15 @@ contract EventContract {
 // ----- Public functions -----
 
   function buy_tickets(uint64 event_id, uint64 requested_num_tickets) external payable {
+    require(requested_num_tickets > 0);
+    require(events[event_id].sale_active, "Ticket sale is closed by seller.");
     require(requested_num_tickets <= events[event_id].available_tickets,
       "Not enough tickets available.");
-    require(!events[event_id].per_customer_limit || 
+    require(!events[event_id].per_customer_limit ||
       (events[event_id].tickets[msg.sender].num_tickets + requested_num_tickets <= events[event_id].max_per_customer),
       "Purchase surpasses max per customer.");
     uint128 sum_price = uint128(requested_num_tickets)*uint128(events[event_id].ticket_price);
     require(msg.value >= sum_price, "Not enough ether was sent.");
-    require(events[event_id].sale_active, "Ticket sale is closed by seller.");
 
     if(events[event_id].tickets[msg.sender].num_tickets == 0) {
       events[event_id].tickets[msg.sender].addr = msg.sender;
