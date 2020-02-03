@@ -4,36 +4,38 @@ This project is an ethereum-based smart contract ticket sale system.
 # Phase 2
 A single contract capable of hosting a number of unique events simultaneously
 
-
-# Phase 1 
-A single contract for a single event (proof of concept stage)
-
 ## Contract interface
-### Owner functions
-A function modifier is applied to all the following functions to make sure only the owner of the contract can call them.
+### Event host functions
+create_event(
+	uint64 num_tickets,
+    uint128 _ticket_price,
+    bool _per_customer_limit,
+    uint64 _max_per_customer)
+- Create a new event. The sender becomes the owner of the new event.
 
+A function modifier is applied to all the following functions to make sure the sender can only alter events he/she has created.
 
-withdraw_funds()
-- Withdraw all funds in the contract
-- Disables the customer buyback function
+withdraw_funds(uint64 event_id)
+- Withdraw all funds received for tickets to the event identified
+- Disables the customer buyback function for this event
 
-get_tickets(address customer)
-- Get the number 
+get_tickets(uint64 event_id, address customer)
+- Get the number of tickets this customer owns for the given event
 
-get_customers()
-- Get arrays of all customer addresses and their associated number of tickets
+get_customers(uint64 event_id)
+- Get arrays of all customer addresses and their associated number of tickets for the given event
 
-stop_sale()
+stop_sale(uint64 event_id)
 - Stop the sale until further notice. Calls to buy tickets will be rejected while sale is stopped.
 
-continue_sale()
+continue_sale(uint64 event_id)
 - Reopens sale if stopped by stop_sale()
 
-add_tickets(uint64 additional_tickets)
+add_tickets(uint64 event_id, uint64 additional_tickets)
 - Increase the number of available tickets by the given amount
 
 change_ticket_price(uint128 new_price)
-- Change the ticket price to the new values
+- Change the ticket price to the new value
 
 ### Customer (public) functions
 buy_tickets()
@@ -48,6 +50,9 @@ return_tickets()
 - Rejects if buyback is disabled
 - Returns the total amount the sender has previously paid to the contract
 - Deletes all tickets owned by sender and adds them to available tickets
+
+get_event_info(uint64 event_id)
+- Get all info associated with an event: owner, available_tickets, max_per_customer, ticket_price, sale_active, buyback_active, per_customer_limit
 
 ## Security considerations
 
@@ -74,4 +79,16 @@ return_tickets()
 	- Private ethereum blockchain
 	
 ## Tests
-- 
+### Unit tests
+- Ticket purchase, checking that contract state changes correctly and cost is correct.
+- Check that customer is unable to buy tickets with insufficient funds.
+- Check that contract returns excessive funds.
+- Check that address which is not owner cannot withdraw.
+- Stop and continue sale function test.
+- Add tickets.
+- Change ticket price. 
+- Gas usage measurements.
+- Functionality of ticket buyback.
+
+### Manual tests
+- Tested by manually interacting with the contract through MyEtherWallet (MEW)
