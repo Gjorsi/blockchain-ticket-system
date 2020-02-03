@@ -12,7 +12,7 @@ contract('EventContract - Buyback tests', (accounts) => {
   it('Create event', async () => {
     let id = web3.utils.asciiToHex("TestEvent1");
     let title = web3.utils.asciiToHex("This is the event title");
-    await eventC.create_event(id, title, 1000, 1e16.toString(), false, 0, true, true, {from:owner});
+    await eventC.create_event(id, title, [1000], [1e16.toString()], false, 0, true, true, {from:owner});
     events.push({ id: id, num_tickets: 1000, ticket_price: 1e16, per_customer_limit: false, max_per_customer: 0, owner: owner});
   });
 
@@ -21,7 +21,7 @@ contract('EventContract - Buyback tests', (accounts) => {
     let tickets_to_buy = 2;
     let tickets_available_before = parseFloat((await eventC.get_event_info(events[0].id)).available_tickets);
     let balance_before = BigInt(await web3.eth.getBalance(buyer));
-    let receipt = await eventC.buy_tickets(events[0].id, tickets_to_buy, {from:buyer, value:events[0].ticket_price*2});
+    let receipt = await eventC.buy_tickets(events[0].id, 0, tickets_to_buy, {from:buyer, value:events[0].ticket_price*2});
     console.log(`     Gas used to buy ${tickets_to_buy} ticket(s): ${receipt.receipt.gasUsed}`);
 
     let tx = await web3.eth.getTransaction(receipt.tx);
