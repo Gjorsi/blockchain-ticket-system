@@ -17,7 +17,7 @@ contract('EventContract - Gas measurements', (accounts) => {
     let id = web3.utils.asciiToHex("TestEvent3");
     let title = web3.utils.asciiToHex("This is the event title");
 
-    let receipt = (await eventC.create_event(id, title, 1000, ticket_price.toString(), false, 0, {from:owner})).receipt;
+    let receipt = (await eventC.create_event(id, title, 1000, ticket_price.toString(), false, 0, true, true, {from:owner})).receipt;
     events.push({ id: id, num_tickets: 1000, ticket_price: 1e16, per_customer_limit: false, max_per_customer: 0, owner: owner});
     gas['create_event'] = receipt.gasUsed;
 

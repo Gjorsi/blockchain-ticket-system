@@ -44,7 +44,9 @@ contract EventContract {
     uint64 num_tickets,
     uint128 _ticket_price,
     bool _per_customer_limit,
-    uint64 _max_per_customer) external {
+    uint64 _max_per_customer,
+    bool _sale_active,
+    bool _buyback_active) external {
       require(!events[_event_id].exists, "Given event ID is not unique - it is already in use.");
       events[_event_id].exists = true;
       events[_event_id].event_id = _event_id;
@@ -54,8 +56,8 @@ contract EventContract {
       events[_event_id].max_per_customer = _max_per_customer;
       events[_event_id].per_customer_limit = _per_customer_limit;
       events[_event_id].owner = msg.sender;
-      events[_event_id].sale_active = true;
-      events[_event_id].buyback_active = true;
+      events[_event_id].sale_active = _sale_active;
+      events[_event_id].buyback_active = _buyback_active;
       event_id_list.push(_event_id);
   }
 

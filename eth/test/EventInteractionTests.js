@@ -13,7 +13,7 @@ contract('EventContract - Interaction tests', (accounts) => {
   it('Create event', async () => {
     let id = web3.utils.asciiToHex("TestEvent2");
     let title = web3.utils.asciiToHex("This is the event title");
-    await eventC.create_event(id, title, 1000, 1e16.toString(), false, 0, {from:owner});
+    await eventC.create_event(id, title, 1000, 1e16.toString(), false, 0, true, true, {from:owner});
 
     events.push({ id: id, num_tickets: 1000, ticket_price: 1e16, per_customer_limit: false, max_per_customer: 0, owner: owner});
   });
