@@ -7,6 +7,7 @@ contract EventContract {
 
   struct Event {
     bytes32 event_id;
+    uint index;
     bytes32 title;
     uint128 funds;
     address payable owner;
@@ -63,6 +64,7 @@ contract EventContract {
       events[_event_id].owner = msg.sender;
       events[_event_id].sale_active = _sale_active;
       events[_event_id].buyback_active = _buyback_active;
+      events[_event_id].index = event_id_list.length;
       event_id_list.push(_event_id);
   }
 
@@ -207,15 +209,11 @@ contract EventContract {
   }
 
   function delete_event(bytes32 event_id) internal {
+    uint old_index = events[event_id].index;
     delete events[event_id];
-    for(uint64 i = 0; i < event_id_list.length; i++) {
-      if (event_id_list[i] == event_id) {
-        // replace with last element in array and reduce its length by 1 to avoid gaps
-        event_id_list[i] = event_id_list[event_id_list.length-1];
-        delete event_id_list[event_id_list.length-1];
-        event_id_list.length--;
-        break;
-      }
-    }
+    events[event_id_list[event_id_list.length - 1]].index = old_index;
+    event_id_list[old_index] = event_id_list[event_id_list.length - 1];
+    delete event_id_list[event_id_list.length - 1];
+    event_id_list.length--;
   }
 }
