@@ -54,7 +54,7 @@ contract EventContract {
       require(num_tickets.length == _ticket_prices.length,
         "Different number of ticket types given by price and number available arrays.");
       require(num_tickets.length > 0, "Cannot create event with zero ticket types.");
-      require(num_tickets.length <= max_ticket_types, "Maximum number of ticket types exceeded.")
+      require(num_tickets.length <= max_ticket_types, "Maximum number of ticket types exceeded.");
       events[_event_id].exists = true;
       events[_event_id].event_id = _event_id;
       events[_event_id].title = _title;

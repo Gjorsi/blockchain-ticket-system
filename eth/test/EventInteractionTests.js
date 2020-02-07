@@ -46,7 +46,7 @@ contract('EventContract - Interaction tests', (accounts) => {
       if(error.message.search('Not enough ether was sent') > -1) {
         // correct outcome, test should pass
       } else {
-        assert.fail(error.message);
+        throw error;
       }
     }
   });
@@ -56,17 +56,15 @@ contract('EventContract - Interaction tests', (accounts) => {
     let balance_before = BigInt(await web3.eth.getBalance(buyer));
     let tickets_to_buy = 1;
     let amount = 2*events[0].ticket_price;
-    try {
-      let rcpt = await eventC.buy_tickets(events[0].id, 0, tickets_to_buy, {from:buyer, value:amount});
-      let tx = await web3.eth.getTransaction(rcpt.tx);
-      let total_gas_cost = tx.gasPrice*rcpt.receipt.gasUsed;
 
-      let expected_balance = balance_before - BigInt(events[0].ticket_price) - BigInt(total_gas_cost);
-      let balance_after = BigInt(await web3.eth.getBalance(buyer));
-      assert.equal(expected_balance, balance_after);
-    } catch (error) {
-      assert.fail(error.message);
-    }
+    let rcpt = await eventC.buy_tickets(events[0].id, 0, tickets_to_buy, {from:buyer, value:amount});
+    let tx = await web3.eth.getTransaction(rcpt.tx);
+    let total_gas_cost = tx.gasPrice*rcpt.receipt.gasUsed;
+
+    let expected_balance = balance_before - BigInt(events[0].ticket_price) - BigInt(total_gas_cost);
+    let balance_after = BigInt(await web3.eth.getBalance(buyer));
+    assert.equal(expected_balance, balance_after);
+
   });
 
   it('Attempt to withdraw funds from unauthorized address', async () => {
@@ -94,7 +92,7 @@ contract('EventContract - Interaction tests', (accounts) => {
       if(error.message.search('Ticket sale is closed by seller') > -1) {
         // correct outcome, test should pass
       } else {
-        assert.fail(error.message);
+        throw error;
       }
     }
 

@@ -55,7 +55,7 @@ contract('EventContract - Buyback tests', (accounts) => {
       if(error.message.search('User does not own any tickets') > -1) {
         // correct outcome, test should pass
       } else {
-        assert.fail(error.message);
+        throw error;
       }
     }
   });
