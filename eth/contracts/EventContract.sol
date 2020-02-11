@@ -4,30 +4,31 @@ contract EventContract {
   // Mapping from event id to event
   mapping(bytes32 => Event) public events;
   bytes32[] public event_id_list;
+  uint8 public max_ticket_types = 100;
 
-  struct Event {
+  struct Event { // attempt strict packaging
     bytes32 event_id;
     uint index;
     bytes32 title;
-    uint128 funds;
-    address payable owner;
-    uint64[] available_tickets;
-    uint64 max_per_customer;
-    uint128[] ticket_prices;
     bool exists;
     bool sale_active;
     bool buyback_active;
     bool per_customer_limit;
-    mapping(address => Customer) tickets;
+    uint64 max_per_customer;
+    uint128 funds;
+    address payable owner;
+    uint64[] available_tickets;
+    uint128[] ticket_prices;
     address[] customers;
+    mapping(address => Customer) tickets;
   }
 
   struct Customer {
     bool exists;
-    address addr;
-    uint64[] num_tickets;
     uint64 total_num_tickets;
     uint128 total_paid;
+    address addr;
+    uint64[] num_tickets;
   }
 
   modifier eventExists(bytes32 event_id){
@@ -54,6 +55,7 @@ contract EventContract {
       require(num_tickets.length == _ticket_prices.length,
         "Different number of ticket types given by price and number available arrays.");
       require(num_tickets.length > 0, "Cannot create event with zero ticket types.");
+      require(num_tickets.length <= max_ticket_types, "Maximum number of ticket types exceeded.");
       events[_event_id].exists = true;
       events[_event_id].event_id = _event_id;
       events[_event_id].title = _title;
