@@ -193,6 +193,15 @@ contract EventContract {
         e.per_customer_limit);
     }
 
+  function delete_event(bytes32 event_id) external eventExists(event_id) onlyHost(event_id) {
+    uint old_index = events[event_id].index;
+    delete events[event_id];
+    events[event_id_list[event_id_list.length - 1]].index = old_index;
+    event_id_list[old_index] = event_id_list[event_id_list.length - 1];
+    delete event_id_list[event_id_list.length - 1];
+    event_id_list.length--;
+  }
+
 // ----- Internal functions -----
 
   function delete_customer(bytes32 event_id, address customer_addr) internal {
@@ -208,12 +217,4 @@ contract EventContract {
     }
   }
 
-  function delete_event(bytes32 event_id) internal {
-    uint old_index = events[event_id].index;
-    delete events[event_id];
-    events[event_id_list[event_id_list.length - 1]].index = old_index;
-    event_id_list[old_index] = event_id_list[event_id_list.length - 1];
-    delete event_id_list[event_id_list.length - 1];
-    event_id_list.length--;
-  }
 }
