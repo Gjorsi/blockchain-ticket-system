@@ -25,6 +25,7 @@ contract EventContract {
 
   struct Customer {
     bool exists;
+    uint index;
     uint64 total_num_tickets;
     uint128 total_paid;
     address addr;
@@ -132,6 +133,7 @@ contract EventContract {
     if(!events[event_id].tickets[msg.sender].exists) {
       events[event_id].tickets[msg.sender].exists = true;
       events[event_id].tickets[msg.sender].addr = msg.sender;
+      events[event_id].tickets[msg.sender].index = events[event_id].customers.length;
       events[event_id].customers.push(msg.sender);
       events[event_id].tickets[msg.sender].num_tickets = new uint64[](events[event_id].available_tickets.length);
     }
@@ -207,16 +209,12 @@ contract EventContract {
 // ----- Internal functions -----
 
   function delete_customer(bytes32 event_id, address customer_addr) internal {
+    uint old_index = events[event_id].tickets[customer_addr].index;
     delete events[event_id].tickets[customer_addr];
-    for(uint64 i = 0; i < events[event_id].customers.length; i++) {
-      if (events[event_id].customers[i] == customer_addr) {
-        // replace with last element in array and reduce its length by 1 to avoid gaps
-        events[event_id].customers[i] = events[event_id].customers[events[event_id].customers.length-1];
-        delete events[event_id].customers[events[event_id].customers.length-1];
-        events[event_id].customers.length--;
-        break;
-      }
-    }
+    events[event_id].tickets[events[event_id].customers[events[event_id].customers.length - 1]].index = old_index;
+    events[event_id].customers[old_index] = events[event_id].customers[events[event_id].customers.length - 1];
+    delete events[event_id].customers[events[event_id].customers.length - 1];
+    events[event_id].customers.length--;
   }
 
 }

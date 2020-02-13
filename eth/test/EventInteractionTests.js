@@ -1,5 +1,6 @@
 const EventContract = artifacts.require("EventContract");
 
+
 contract('EventContract - Interaction tests', (accounts) => {
 
   let eventC;
@@ -33,6 +34,28 @@ contract('EventContract - Interaction tests', (accounts) => {
 
     buyers_tickets = await eventC.get_tickets(events[0].id, buyer, {from:owner});
     assert.equal(buyers_tickets, tickets_to_buy+1);
+  });
+
+  it('Attempt return tickets', async () => {
+    let buyer = accounts[5];
+    let tickets_to_buy = 5;
+    let balance_before = BigInt(await web3.eth.getBalance(buyer));
+    let purchase = await eventC.buy_tickets(events[0].id, 0, tickets_to_buy, {from:buyer, value: events[0].ticket_price*tickets_to_buy});
+    let tx = await web3.eth.getTransaction(purchase.tx);
+    let purchase_gas = BigInt(tx.gasPrice)*BigInt(purchase.receipt.gasUsed);
+
+    let buyers_tickets = await eventC.get_tickets(events[0].id, buyer, {from:owner});
+    assert.equal(buyers_tickets, tickets_to_buy);
+
+    let returned = await eventC.return_tickets(events[0].id, {from:buyer});
+    tx = await web3.eth.getTransaction(returned.tx);
+    let returned_gas = BigInt(tx.gasPrice)*BigInt(returned.receipt.gasUsed);
+
+    buyers_tickets = await eventC.get_tickets(events[0].id, buyer, {from:owner});
+    assert.equal(buyers_tickets, 0);
+
+    let balance_after = BigInt(await web3.eth.getBalance(buyer));
+    assert.equal(balance_before - purchase_gas - returned_gas, balance_after);
   });
 
   it('Attempt to buy a ticket with insufficient amount', async () => {
@@ -113,5 +136,19 @@ contract('EventContract - Interaction tests', (accounts) => {
     await eventC.change_ticket_price(events[0].id, 0, (old_ticket_price + BigInt(1e16)).toString(), {from:owner});
     let new_ticket_price = BigInt((await eventC.get_event_info(events[0].id)).ticket_price);
     assert.equal(old_ticket_price+BigInt(1e16), new_ticket_price);
+  });
+
+  it('Delete event', async () => {
+    let id = web3.utils.asciiToHex("TestEvent3");
+    let title = web3.utils.asciiToHex("This event will be deleted soon");
+    await eventC.create_event(id, title, [10000], [1e17.toString()], false, 0, true, true, {from:accounts[6]});
+
+    await eventC.delete_event(id, {from:accounts[6]});
+    try {
+      await eventC.get_event_info(id);
+      assert.fail('Event not deleted');
+    } catch (error) {
+      // Good
+    }
   });
 });
