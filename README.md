@@ -81,6 +81,7 @@ get_event_info(uint64 event_id)
 ## Tests
 ### Unit tests
 - Ticket purchase, checking that contract state changes correctly and cost is correct.
+- Returning tickets, checking that customer no longer owns tickets, and that ether has been returned.
 - Check that customer is unable to buy tickets with insufficient funds.
 - Check that contract returns excessive funds.
 - Check that address which is not owner cannot withdraw.
