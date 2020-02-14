@@ -184,18 +184,22 @@ contract EventContract {
     bool sale_active,
     bool buyback_active,
     bool per_customer_limit) {
-      Event memory e = events[event_id]; // does this make a deep copy of the struct to memory?
-      return (
-        e.event_id,
-        e.title,
-        e.owner,
-        e.available_tickets,
-        e.max_per_customer,
-        e.ticket_prices,
-        e.sale_active,
-        e.buyback_active,
-        e.per_customer_limit);
-    }
+    Event memory e = events[event_id]; // does this make a deep copy of the struct to memory?
+    return (
+      e.event_id,
+      e.title,
+      e.owner,
+      e.available_tickets,
+      e.max_per_customer,
+      e.ticket_prices,
+      e.sale_active,
+      e.buyback_active,
+      e.per_customer_limit);
+  }
+
+  function get_events() external view returns (bytes32[] memory event_list) {
+    return event_id_list;
+  }
 
   function delete_event(bytes32 event_id) external eventExists(event_id) onlyHost(event_id) {
     uint old_index = events[event_id].index;
