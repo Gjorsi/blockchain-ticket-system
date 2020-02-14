@@ -1,7 +1,10 @@
 import React, { Component } from "react";
 import EventContract from "./contracts/EventContract.json";
 import getWeb3 from "./getWeb3";
-import Tabs from "./Tabs.js";
+import Button from "@material-ui/core/Button";
+import TextField from "@material-ui/core/TextField";
+import Tabs from "@material-ui/core/Tabs";
+import Tab from "@material-ui/core/Tab";
 
 import "./App.css";
 
@@ -10,7 +13,7 @@ const styles = {
 };
 
 class App extends Component {
-  state = { web3: null, accounts: null, contract: null, active: 'viewEventsTab' };
+  state = { web3: null, accounts: null, contract: null, activeTab: 'browse' };
 
   componentDidMount = async () => {
     try {
@@ -53,28 +56,40 @@ class App extends Component {
     //this.setState({ storageValue: response });
   };
 
+  changeTab = (event, value) => {
+    this.setState({ activeTab: value });
+  }
+
+
+
   render() {
-    
-    const content = {
-     viewEventsTab: 'Browse events',
-     myEventsTab: 'My events',
-     createEventTab: 'Create event',
-	};
 
     if (!this.state.web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
     }
+
+    const content = {
+      browse: 'Browsing events',
+      my_tickets: 'My tickets',
+      my_events: 'My events',
+      create: 'Create event',
+    }
+
     return (
       <div className="App" style={styles}>
         <Tabs
-            active={this.state.active} 
-            onChange={active => this.setState({active})}
+            value={this.state.activeTab}
+            indicatorColor="secondary"
+            textColor="primary"
+            centered="True"
+            onChange={this.changeTab}
         >
-            <div key="viewEventsTab">Browse events</div>
-            <div key="myEventsTab">My events</div>
-            <div key="createEventTab">Create event</div>
+            <Tab label="Browse events" value="browse" />
+            <Tab label="My tickets" value="my_tickets" />
+            <Tab label="My events" value="my_events" />
+            <Tab label="Create event" value="create" />
         </Tabs>
-        <p>{content[this.state.active]}</p>
+        <div>{content[this.state.activeTab]}</div>
       </div>
     );
   }
