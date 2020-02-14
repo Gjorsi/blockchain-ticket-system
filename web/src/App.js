@@ -1,11 +1,16 @@
 import React, { Component } from "react";
 import EventContract from "./contracts/EventContract.json";
 import getWeb3 from "./getWeb3";
+import Tabs from "./Tabs.js";
 
 import "./App.css";
 
+const styles = {
+    fontFamily: 'sans-serif',
+};
+
 class App extends Component {
-  state = { web3: null, accounts: null, contract: null };
+  state = { web3: null, accounts: null, contract: null, active: 'viewEventsTab' };
 
   componentDidMount = async () => {
     try {
@@ -49,18 +54,27 @@ class App extends Component {
   };
 
   render() {
+    
+    const content = {
+     viewEventsTab: 'Browse events',
+     myEventsTab: 'My events',
+     createEventTab: 'Create event',
+	};
+
     if (!this.state.web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
     }
     return (
-      <div className="App">
-        <h1>Title</h1>
-        <p>Successfully connected with web3</p>
-        <h2>Placeholder</h2>
-        <p>
-          Text
-        </p>
-        <div>Placeholder</div>
+      <div className="App" style={styles}>
+        <Tabs
+            active={this.state.active} 
+            onChange={active => this.setState({active})}
+        >
+            <div key="viewEventsTab">Browse events</div>
+            <div key="myEventsTab">My events</div>
+            <div key="createEventTab">Create event</div>
+        </Tabs>
+        <p>{content[this.state.active]}</p>
       </div>
     );
   }
