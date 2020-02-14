@@ -1,2 +1,6 @@
 build/
 *.swp
+
+node_modules/
+web/src/contracts
+.vs
