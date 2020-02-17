@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import TextField from "@material-ui/core/TextField";
+import { Switch, TextField } from '@material-ui/core';
 
 export default class BrowseEvents extends Component {
 	render() {

@@ -59,7 +59,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 class App extends Component {
-  state = { web3: null, accounts: null, contract: null, activeTab: 0 };
+  state = { web3: null, accounts: null, contract: null, activeTab: 3 };
 
   componentDidMount = async () => {
     try {
@@ -119,7 +119,7 @@ class App extends Component {
                 value={this.state.activeTab}
                 indicatorColor="primary"
                 textColor="primary"
-                centered="True"
+                centered={true}
                 onChange={this.changeTab}
                 aria-label="simple tabs example"
             >
@@ -142,7 +142,7 @@ class App extends Component {
         </TabPanel>
 
         <TabPanel value={this.state.activeTab} index={3}>
-            <CreateEvent />
+            <CreateEvent web3={this.state.web3} accounts={this.state.accounts} contract={this.state.contract}/>
         </TabPanel>
 
       </div>
