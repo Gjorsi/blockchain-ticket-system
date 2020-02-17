@@ -12,6 +12,10 @@ import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 
 import "./App.css";
+import CreateEvent from "./components/CreateEvent";
+import BrowseEvents from "./components/BrowseEvents";
+import MyTickets from "./components/MyTickets";
+import MyEvents from "./components/MyEvents";
 
 const styles = {
     fontFamily: 'sans-serif',
@@ -126,22 +130,19 @@ class App extends Component {
             </Tabs>
         </AppBar>
         <TabPanel value={this.state.activeTab} index={0}>
-            <h1>Browsing events</h1>
+            <BrowseEvents />
         </TabPanel>
 
         <TabPanel value={this.state.activeTab} index={1}>
-            <h1>My tickets</h1>
+            <MyTickets />
         </TabPanel>
 
         <TabPanel value={this.state.activeTab} index={2}>
-            <h1>My events</h1>
+            <MyEvents />
         </TabPanel>
 
         <TabPanel value={this.state.activeTab} index={3}>
-            <h1>Create event</h1>
-            <TextField id="event_ID" label="Unique event ID" variant="outlined" required="True" />
-            <TextField id="event_title" label="Event title" variant="outlined" required="True" />
-            <TextField id="event_title" label="Event title" variant="outlined" required="True" />
+            <CreateEvent />
         </TabPanel>
 
       </div>
