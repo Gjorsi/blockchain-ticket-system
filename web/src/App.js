@@ -74,7 +74,7 @@ class App extends Component {
       const deployedNetwork = EventContract.networks[networkId];
       const instance = new web3.eth.Contract(
         EventContract.abi,
-        deployedNetwork && deployedNetwork.address,
+        deployedNetwork.address
       );
 
       // Set web3, accounts, and contract to the state, and then proceed with an
@@ -130,7 +130,7 @@ class App extends Component {
             </Tabs>
         </AppBar>
         <TabPanel value={this.state.activeTab} index={0}>
-            <BrowseEvents />
+            <BrowseEvents contract={this.state.contract}/>
         </TabPanel>
 
         <TabPanel value={this.state.activeTab} index={1}>
