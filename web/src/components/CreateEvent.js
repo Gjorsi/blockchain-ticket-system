@@ -1,10 +1,17 @@
 import React, { Component } from "react";
-import { Switch, TextField, FormControlLabel } from '@material-ui/core';
+import { Switch, TextField, FormControlLabel, Button } from '@material-ui/core';
 
 export default class CreateEvent extends Component {
   state = {event_ID: null, event_title: null, sale_active: false, buyback_active: false, customer_limited: false, 
-        tickets_per_customer: 0, ticket_types: 1, price_table: [], ticket_avail: [], ticket_prices: []};
-  
+        tickets_per_customer: 1, ticket_types: 1, price_table: [], button_disabled: true};
+
+  componentDidMount() {
+    this.set_ticket_types(1);
+  }
+
+  tickets_avail = [];
+  ticket_prices = [];
+
   render() {
     return (
       <div>
@@ -15,14 +22,14 @@ export default class CreateEvent extends Component {
           label="Unique event ID" 
           variant="outlined" 
           required={true} 
-          onChange={e => this.setState({event_ID: e.target.value})} />
+          onChange={e => this.update_event_ID(e.target.value) } />
 
         <TextField 
           id="event_title" 
           label="Event title" 
           variant="outlined" 
           required={true}
-          onChange={e => this.setState({event_title: e.target.value})} />
+          onChange={e => this.update_title(e.target.value) } />
 
         <div><FormControlLabel
           control={<Switch onChange={e => this.setState({sale_active: e.target.checked})} />}
@@ -51,9 +58,10 @@ export default class CreateEvent extends Component {
 
         {this.state.price_table}
 
-        {this.ticket_avail}
-        {this.ticket_prices}
-          
+        <div><Button
+          id="createButton"
+          variant="contained"
+          disabled={this.state.button_disabled}>Create Event</Button></div>
       </div>
     );
   }
@@ -73,11 +81,12 @@ export default class CreateEvent extends Component {
     )
   }
 
-  set_ticket_types(val) {
-    this.setState({ticket_types: val});
-    this.setState({ticket_avail: new Array(val).fill(1)});
-    this.setState({ticket_prices: new Array(val).fill(1)});
+  set_ticket_types = async (val) => {
+    await this.setState({ticket_types: val});
     this.tickets_and_prices();
+    this.tickets_avail = new Array(val);
+    this.ticket_prices = new Array(val);
+    this.check_form();
   }
 
   tickets_and_prices() {
@@ -91,20 +100,47 @@ export default class CreateEvent extends Component {
           margin="normal"
           required={true}
           type="number"
-          defaultValue={this.state.ticket_avail[i]}
           inputProps={{ min: "1", step: "1" }}
-          onChange={e => this.state.ticket_avail[i] = e.target.value} />
+          onChange={e => { this.tickets_avail[i] = e.target.value; this.check_form() }}
+          helperText={"Ticket type " + (i+1)} />
         <TextField 
           id={"ticket_price" + i}
-          label="Ticket price" 
-          variant="outlined" 
+          label="Ticket price"
+          variant="outlined"
           margin="normal"
           required={true}
           type="number"
-          defaultValue={this.state.ticket_prices[i]}
           inputProps={{ min: "1", step: "1" }}
-          onChange={e => this.state.ticket_prices[i] = e.target.value} /></div>
+          onChange={e => {this.ticket_prices[i] = e.target.value; this.check_form() }} /></div>
       )]}))
     }
+  }
+
+  update_event_ID = async (val) => {
+    await this.setState({event_ID: val});
+    this.check_form();
+  }
+
+  update_title = async (val) => {
+    await this.setState({title: val});
+    this.check_form();
+  }
+
+  check_form = async () => {
+    let button_state = this.check_fields();
+    await this.setState({button_disabled: button_state})
+  }
+
+  check_fields() {
+    if (typeof this.state.event_ID !== "string") return true;
+    if (typeof this.state.event_ID === "string" && this.state.event_ID.length < 1) return true;
+    if (typeof this.state.title !== "string") return true;
+    if (typeof this.state.title === "string" && this.state.title.length < 1) return true;
+
+    for (let i=0; i<this.state.ticket_types; i++) {
+      if (!this.tickets_avail[i] || !this.ticket_prices[i]) return true;
+    }
+
+    return false;
   }
 }
