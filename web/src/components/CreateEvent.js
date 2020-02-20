@@ -61,7 +61,9 @@ export default class CreateEvent extends Component {
         <div><Button
           id="createButton"
           variant="contained"
-          disabled={this.state.button_disabled}>Create Event</Button></div>
+          disabled={this.state.button_disabled}
+          onClick={() => { this.submit() }}
+          >Create Event</Button></div>
       </div>
     );
   }
@@ -142,5 +144,22 @@ export default class CreateEvent extends Component {
     }
 
     return false;
+  }
+
+  submit = async () => {
+    try {
+      await this.props.contract.methods.create_event(
+        this.props.web3.utils.asciiToHex(this.state.event_ID),
+        this.props.web3.utils.asciiToHex(this.state.title),
+        this.tickets_avail,
+        this.ticket_prices,
+        this.state.customer_limited,
+        this.state.tickets_per_customer,
+        this.state.sale_active,
+        this.state.buyback_active
+        ).send({from: this.props.accounts[0]});
+    } catch (error) {
+      console.log("Dev error: " + error);
+    }
   }
 }

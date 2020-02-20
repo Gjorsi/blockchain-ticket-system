@@ -1,8 +1,6 @@
 import React, { Component } from "react";
 import EventContract from "./contracts/EventContract.json";
 import getWeb3 from "./getWeb3";
-import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
 import AppBar from '@material-ui/core/AppBar';
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
@@ -16,10 +14,6 @@ import CreateEvent from "./components/CreateEvent";
 import BrowseEvents from "./components/BrowseEvents";
 import MyTickets from "./components/MyTickets";
 import MyEvents from "./components/MyEvents";
-
-const styles = {
-    fontFamily: 'sans-serif',
-};
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
