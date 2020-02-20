@@ -1,22 +1,47 @@
 import React, { Component } from 'react';
-import { bytesToString } from '../util/conversion.js'
+import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+import Typography from '@material-ui/core/Typography';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+
+import { bytesToString } from '../util/conversion.js';
+import './EventList.css';
 
 export class EventListItem extends Component {
   constructor(props){
     super(props);
-    this.state = {title: null}
+    this.state = {title: null, tickets: [], prices: [], active: false}
   }
-  
+
   componentDidMount = async () => {
     this.props.contract.methods
     .get_event_info(this.props.eventId).call().then(res => {
-      this.setState({title: bytesToString(res.title)});
+      console.log(res);
+      this.setState({
+        title: bytesToString(res.title),
+        tickets: res.available_tickets,
+        prices: res.ticket_price,
+        active: res.sale_active,
+      });
     });
   }
 
   render() {
     return (
-      <li>{this.state.title}</li>
+      <ExpansionPanel>
+        <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography className="heading">
+            {this.state.title}
+          </Typography>
+          <Typography className="secondaryHeading">
+            {this.state.tickets.reduce((a,b)=>a+parseInt(b),0)} available tickets
+          </Typography>
+        </ExpansionPanelSummary>
+        <ExpansionPanelDetails>
+          Title: {this.state.title}<br/>
+        </ExpansionPanelDetails>
+      </ExpansionPanel>
     );
   }
 }
@@ -34,11 +59,14 @@ export default class EventList extends Component {
 
   render() {
     return(
-      <ul>
+      <div>
         {this.state.events.map(e =>
-          <EventListItem contract={this.props.contract} eventId={e} />
+          <EventListItem 
+            key={e}
+            contract={this.props.contract}
+            eventId={e} />
         )}
-      </ul>
+      </div>
     )
   }
 }
