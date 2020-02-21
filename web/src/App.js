@@ -71,8 +71,7 @@ class App extends Component {
         deployedNetwork.address
       );
 
-      // Set web3, accounts, and contract to the state, and then proceed with an
-      // example of interacting with the contract's methods.
+      // Set web3, accounts, and contract to the state
       this.setState({ web3, accounts, contract: instance }, this.runExample);
     } catch (error) {
       // Catch any errors for any of the above operations.
@@ -81,19 +80,6 @@ class App extends Component {
       );
       console.error(error);
     }
-  };
-
-  runExample = async () => {
-    const { accounts, contract } = this.state;
-
-    // Stores a given value, 5 by default.
-    //await contract.methods.set(5).send({ from: accounts[0] });
-
-    // Get the value from the contract to prove it worked.
-    //const response = await contract.methods.get().call();
-
-    // Update state with the result.
-    //this.setState({ storageValue: response });
   };
 
   changeTab = (event, value) => {
@@ -129,7 +115,7 @@ class App extends Component {
         </TabPanel>
 
         <TabPanel value={this.state.activeTab} index={1}>
-            <MyTickets />
+            <MyTickets web3={this.state.web3} accounts={this.state.accounts} contract={this.state.contract}/>
         </TabPanel>
 
         <TabPanel value={this.state.activeTab} index={2}>
