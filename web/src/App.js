@@ -71,8 +71,10 @@ class App extends Component {
         deployedNetwork.address
       );
 
+      let event_list = await instance.methods.get_events().call();
+
       // Set web3, accounts, and contract to the state
-      this.setState({ web3, accounts, contract: instance }, this.runExample);
+      this.setState({ web3, accounts, contract: instance, events: event_list });
     } catch (error) {
       // Catch any errors for any of the above operations.
       alert(
@@ -115,15 +117,26 @@ class App extends Component {
         </TabPanel>
 
         <TabPanel value={this.state.activeTab} index={1}>
-            <MyTickets web3={this.state.web3} accounts={this.state.accounts} contract={this.state.contract}/>
+            <MyTickets 
+              web3={this.state.web3} 
+              accounts={this.state.accounts} 
+              contract={this.state.contract}
+              events={this.state.events}/>
         </TabPanel>
 
         <TabPanel value={this.state.activeTab} index={2}>
-            <MyEvents />
+            <MyEvents 
+              web3={this.state.web3} 
+              accounts={this.state.accounts} 
+              contract={this.state.contract} 
+              events={this.state.events}/>
         </TabPanel>
 
         <TabPanel value={this.state.activeTab} index={3}>
-            <CreateEvent web3={this.state.web3} accounts={this.state.accounts} contract={this.state.contract}/>
+            <CreateEvent 
+              web3={this.state.web3} 
+              accounts={this.state.accounts} 
+              contract={this.state.contract}/>
         </TabPanel>
 
       </div>
