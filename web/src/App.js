@@ -125,7 +125,9 @@ class App extends Component {
             </Tabs>
         </AppBar>
         <TabPanel value={this.state.activeTab} index={0}>
-            <BrowseEvents contract={this.state.contract}/>
+          <BrowseEvents 
+            contract={this.state.contract} 
+            accounts={this.state.accounts}/>
         </TabPanel>
 
         <TabPanel value={this.state.activeTab} index={1}>
