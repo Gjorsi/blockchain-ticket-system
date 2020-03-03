@@ -16,7 +16,7 @@ export default class BrowseEvents extends Component {
     return (
       <div>
         <h2>Browse Events</h2>
-        <EventList contract={this.props.contract} />
+        <EventList {...this.props} />
       </div>
     );
   }

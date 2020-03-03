@@ -8,3 +8,11 @@
   font-size: 15px;
   color: #999;
 }
+
+.expansionPanelDetails {
+  display: block;
+}
+
+.expansionPanelDetails h3 {
+  width: 100%;
+}
