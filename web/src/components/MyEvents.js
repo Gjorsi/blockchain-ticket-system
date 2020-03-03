@@ -13,17 +13,14 @@ export default class MyEvents extends Component {
 
   componentDidMount = async () => {
     // extract list of owned events from all events
-    this.props.events.forEach((e) => {
-      this.props.contract.methods.get_event_info(e).call().then(res => {
-        if (res.owner === this.props.accounts[0]) {
-          this.owned_events.push(bytesToString(e));
-          this.setState({owned_events: [...this.owned_events]});
-          console.log(bytesToString(e));
-        }
-      });
-    });
+    await Promise.all(this.props.events.map(async (event) => {
+      let res = await this.props.contract.methods.get_event_info(event).call();
+      if (res.owner === this.props.accounts[0]) {
+        this.owned_events.push(bytesToString(event));
+      }
+    }));
 
-    console.log(this.owned_events.length);
+    this.setState({owned_events: this.owned_events});
   }
 
   render() {
