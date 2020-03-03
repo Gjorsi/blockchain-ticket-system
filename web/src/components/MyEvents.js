@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { TextField } from '@material-ui/core';
 import { bytesToString } from '../util/conversion.js';
 
-import EventListItem from './EventList.js';
+import OwnedEvent from './OwnedEvent.js';
 
 export default class MyEvents extends Component {
   owned_events = [];
@@ -17,20 +17,23 @@ export default class MyEvents extends Component {
       this.props.contract.methods.get_event_info(e).call().then(res => {
         if (res.owner === this.props.accounts[0]) {
           this.owned_events.push(bytesToString(e));
+          this.setState({owned_events: [...this.owned_events]});
+          console.log(bytesToString(e));
         }
       });
     });
 
-    await this.setState({owned_events: this.owned_events});
-    console.log(this.state.owned_events);
+    console.log(this.owned_events.length);
   }
 
   render() {
     return (
       <div>
         {this.state.owned_events.map(e =>
-          <EventListItem
+          <OwnedEvent
             key={e}
+            web3={this.state.web3} 
+            accounts={this.state.accounts} 
             contract={this.props.contract}
             eventId={e} />
         )}
