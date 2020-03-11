@@ -16,6 +16,7 @@ contract EventContract {
     bool per_customer_limit;
     uint64 max_per_customer;
     uint128 funds;
+    uint256 deadline;
     address payable owner;
     uint64[] available_tickets;
     uint128[] ticket_prices;
@@ -42,6 +43,11 @@ contract EventContract {
     _;
   }
 
+  modifier beforeDeadline(bytes32 event_id){
+      require(events[event_id].deadline > block.timestamp, "Event deadline has passed");
+      _;
+  }
+
 // ----- Event host functions -----
 
   function create_event(bytes32 _event_id,
@@ -51,12 +57,14 @@ contract EventContract {
     bool _per_customer_limit,
     uint64 _max_per_customer,
     bool _sale_active,
-    bool _buyback_active) external {
+    bool _buyback_active,
+    uint256 _deadline) external {
       require(!events[_event_id].exists, "Given event ID is already in use.");
       require(num_tickets.length == _ticket_prices.length,
         "Different number of ticket types given by price and number available arrays.");
       require(num_tickets.length > 0, "Cannot create event with zero ticket types.");
       require(num_tickets.length <= max_ticket_types, "Maximum number of ticket types exceeded.");
+      require(_deadline > block.timestamp, "Deadline cannot be in the past");
       events[_event_id].exists = true;
       events[_event_id].event_id = _event_id;
       events[_event_id].title = _title;
@@ -67,6 +75,7 @@ contract EventContract {
       events[_event_id].owner = msg.sender;
       events[_event_id].sale_active = _sale_active;
       events[_event_id].buyback_active = _buyback_active;
+      events[_event_id].deadline = _deadline;
       events[_event_id].index = event_id_list.length;
       event_id_list.push(_event_id);
   }
@@ -118,7 +127,7 @@ contract EventContract {
 
 // ----- Public functions -----
 
-  function buy_tickets(bytes32 event_id, uint64 ticket_type, uint64 requested_num_tickets) external payable {
+  function buy_tickets(bytes32 event_id, uint64 ticket_type, uint64 requested_num_tickets) external payable beforeDeadline(event_id) {
     require(requested_num_tickets > 0);
     require(ticket_type < events[event_id].available_tickets.length, "Ticket type does not exist.");
     require(events[event_id].sale_active, "Ticket sale is closed by seller.");
@@ -151,7 +160,7 @@ contract EventContract {
     }
   }
 
-  function return_tickets(bytes32 event_id) external {
+  function return_tickets(bytes32 event_id) external beforeDeadline(event_id) {
     require(events[event_id].tickets[msg.sender].total_num_tickets > 0,
       "User does not own any tickets to this event.");
     require(events[event_id].buyback_active, "Ticket buyback has been deactivated by owner.");

@@ -18,13 +18,14 @@ contract('EventContract - Gas measurements', (accounts) => {
     let title = web3.utils.asciiToHex("This is the event title");
 
     // Test event for later tests
-    let receipt = (await eventC.create_event(id, title, [1000], [ticket_price.toString()], false, 0, true, true, {from:owner})).receipt;
+    let deadline = Math.round(new Date("2021-01-01").getTime() / 1000)
+    let receipt = (await eventC.create_event(id, title, [1000], [ticket_price.toString()], false, 0, true, true, deadline, {from:owner})).receipt;
     test_event = { id: id, num_tickets: 1000, ticket_price: 1e16, per_customer_limit: false, max_per_customer: 0, owner: owner};
 
     // Create event
     gas['create_event'] = await Promise.all(accounts.map(async (acc) => {
       // Create one event per account
-      return eventC.create_event(acc, title, [1000], [ticket_price.toString()], false, 0, true, true, {from:acc}); 
+      return eventC.create_event(acc, title, [1000], [ticket_price.toString()], false, 0, true, true, deadline, {from:acc}); 
     })).then((receipts) => {
       let total = receipts.map((r) => r.receipt.gasUsed).reduce((a,b) => a+b,0); // Sum gas
       return Math.round(total / accounts.length); // Calculate average

@@ -14,7 +14,8 @@ contract('EventContract - Interaction tests', (accounts) => {
   it('Create event', async () => {
     let id = web3.utils.asciiToHex("TestEvent2");
     let title = web3.utils.asciiToHex("This is the event title");
-    await eventC.create_event(id, title, [1000], [1e16.toString()], false, 0, true, true, {from:owner});
+    let deadline = Math.round(new Date("2021-01-01").getTime() / 1000)
+    await eventC.create_event(id, title, [1000], [1e16.toString()], false, 0, true, true, deadline, {from:owner});
 
     events.push({ id: id, num_tickets: 1000, ticket_price: 1e16, per_customer_limit: false, max_per_customer: 0, owner: owner});
   });
@@ -138,10 +139,27 @@ contract('EventContract - Interaction tests', (accounts) => {
     assert.equal(old_ticket_price+BigInt(1e16), new_ticket_price);
   });
 
+  it('Create event with passed deadline', async () => {
+    let deadline = Math.round(new Date("2020-01-01").getTime() / 1000)
+    try {
+      let id = web3.utils.asciiToHex(Math.random().toString());
+      let title = web3.utils.asciiToHex(Math.random().toString());
+      await eventC.create_event(id, title, [10000], [1e17.toString()], false, 0, true, true, deadline, {from:accounts[6]});
+      assert.fail('Can create event with passed deadline');
+    } catch (error) {
+      if(error.message.search('Deadline cannot be in the past') > -1) {
+        // correct outcome, test should pass
+      } else {
+        throw error;
+      }
+    }
+  });
+
   it('Delete event', async () => {
     let id = web3.utils.asciiToHex("TestEvent3");
     let title = web3.utils.asciiToHex("This event will be deleted soon");
-    await eventC.create_event(id, title, [10000], [1e17.toString()], false, 0, true, true, {from:accounts[6]});
+    let deadline = Math.round(new Date("2021-01-01").getTime() / 1000)
+    await eventC.create_event(id, title, [10000], [1e17.toString()], false, 0, true, true, deadline, {from:accounts[6]});
 
     await eventC.delete_event(id, {from:accounts[6]});
     try {
