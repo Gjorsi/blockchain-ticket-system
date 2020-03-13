@@ -13,6 +13,8 @@ export default class OwnedEvent extends Component {
   componentDidMount = async () => {
     // extract list of owned events from all events
     this.setState({event: await this.props.contract.methods.get_event_info(Web3.utils.asciiToHex(this.props.eventId)).call()});
+
+    this.tickets_and_prices();
   }
 
   render() {
@@ -26,17 +28,26 @@ export default class OwnedEvent extends Component {
           {!!(this.state.event)?bytesToString(this.state.event.title):"loading.."}
         </ExpansionPanelSummary>
         <ExpansionPanelDetails>
-
-          <div><Chip
+          <div>
+          <Chip
             avatar={<Avatar>S</Avatar>}
             label="Sale Status"
             color={this.get_color(this.state.event.sale_active)}
             clickable
             onClick={() => this.handleActivateSale(this.state.event.sale_active)}
-            variant="outlined"/></div>
-          <br/>...Sale status (active, buyback etc)
+            variant="outlined"/>
+
+          <Chip
+            avatar={<Avatar>B</Avatar>}
+            label="Buyback Status"
+            color={this.get_color(this.state.event.buyback_active)}
+            variant="outlined"/>
+          </div>
+          <div>
+            {this.state.ticket_list}
+          </div>
+
           <br/>...List tickets available / sold / total
-          <br/>...Start/stop sale
           <br/>...Get customer list
           <br/>...Add tickets
           <br/>...Change ticket prices
@@ -56,11 +67,23 @@ export default class OwnedEvent extends Component {
   }
 
   handleActivateSale = async (activator) => {
-    console.log("Changed sale status");
     if (activator) {
       await this.props.contract.methods.stop_sale(Web3.utils.asciiToHex(this.props.eventId)).send({from: this.props.accounts[0]});
     } else {
       await this.props.contract.methods.continue_sale(Web3.utils.asciiToHex(this.props.eventId)).send({from: this.props.accounts[0]});
+    }
+  }
+
+  tickets_and_prices() {
+    this.setState({ticket_list: []});
+    console.log(this.state.event.available_tickets.length);
+    for (let i=0; i<this.state.event.available_tickets.length; i++) {
+      
+      this.setState(prevState => ({ ticket_list: [prevState.ticket_list, (
+        <div>
+          Ticket type {i} - Available tickets: {this.state.event.available_tickets[i]} | Ticket price: {this.state.event.ticket_price[i]}
+        </div>
+      )]}))
     }
   }
 }
