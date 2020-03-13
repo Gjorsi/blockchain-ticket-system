@@ -26,12 +26,14 @@ export default class OwnedEvent extends Component {
           {!!(this.state.event)?bytesToString(this.state.event.title):"loading.."}
         </ExpansionPanelSummary>
         <ExpansionPanelDetails>
-          <Chip
-            avatar={<Avatar>A</Avatar>}
+
+          <div><Chip
+            avatar={<Avatar>S</Avatar>}
             label="Sale Status"
             color={this.get_color(this.state.event.sale_active)}
-            variant="outlined"
-            onDelete={this.handleActivateSale()}/>
+            clickable
+            onClick={() => this.handleActivateSale(this.state.event.sale_active)}
+            variant="outlined"/></div>
           <br/>...Sale status (active, buyback etc)
           <br/>...List tickets available / sold / total
           <br/>...Start/stop sale
@@ -49,11 +51,16 @@ export default class OwnedEvent extends Component {
   }
 
   get_icon(activator) {
-    if (activator) return "CloseIcon"
-    else return "CheckIcon";
+    if (activator) return <CloseIcon />
+    else return <CheckIcon />;
   }
 
-  handleActivateSale() {
-    return
+  handleActivateSale = async (activator) => {
+    console.log("Changed sale status");
+    if (activator) {
+      await this.props.contract.methods.stop_sale(Web3.utils.asciiToHex(this.props.eventId)).send({from: this.props.accounts[0]});
+    } else {
+      await this.props.contract.methods.continue_sale(Web3.utils.asciiToHex(this.props.eventId)).send({from: this.props.accounts[0]});
+    }
   }
 }

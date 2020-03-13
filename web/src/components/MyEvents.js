@@ -29,8 +29,8 @@ export default class MyEvents extends Component {
         {this.state.owned_events.map(e =>
           <OwnedEvent
             key={e}
-            web3={this.state.web3} 
-            accounts={this.state.accounts} 
+            web3={this.props.web3} 
+            accounts={this.props.accounts} 
             contract={this.props.contract}
             eventId={e} />
         )}
