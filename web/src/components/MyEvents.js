@@ -26,9 +26,9 @@ export default class MyEvents extends Component {
   render() {
     return (
       <div>
-        {this.state.owned_events.map(e =>
+        {this.state.owned_events.map((e, i) =>
           <OwnedEvent
-            key={e}
+            key={i}
             web3={this.props.web3} 
             accounts={this.props.accounts} 
             contract={this.props.contract}

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
-import { TextField, ExpansionPanel, ExpansionPanelSummary, Button, 
-ExpansionPanelDetails, Typography, Chip, Avatar, FormControl, Backdrop } from '@material-ui/core';
+import { TextField, ExpansionPanel, ExpansionPanelSummary, Button, Select, FormHelperText, 
+ExpansionPanelDetails, Typography, Chip, Avatar, FormControl, MenuItem } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 import { bytesToString } from '../../util/conversion.js';
@@ -56,8 +56,7 @@ export default class OwnedEvent extends Component {
               prices={this.state.event.ticket_price}/>
 
             <br/>...Get customer list
-            <br/>...Add tickets
-            <br/>...Change ticket prices
+
           </FormControl>
         </ExpansionPanelDetails>
       </ExpansionPanel>
@@ -83,7 +82,7 @@ export default class OwnedEvent extends Component {
       
       this.setState(prevState => ({ ticket_list: [prevState.ticket_list, (
         <div>
-          Ticket type {i} - Available tickets: {this.state.event.available_tickets[i]} | Ticket price: {this.state.event.ticket_price[i]}
+          Ticket type {i+1} - Available tickets: {this.state.event.available_tickets[i]} | Ticket price: {this.state.event.ticket_price[i]}
         </div>
       )]}))
     }
@@ -126,7 +125,6 @@ export class AddTickets extends Component {
   }
 
   submit = async () => {
-    console.log(this.addTickets);
     try {
       await this.props.contract.methods.add_tickets(
         this.props.web3.utils.asciiToHex(this.props.eventId),
@@ -139,6 +137,7 @@ export class AddTickets extends Component {
 }
 
 export class ChangePrices extends Component {
+  state = {ticketType: 0, newPrice: this.props.prices[0]}
 
   render() {
     return(
@@ -148,25 +147,47 @@ export class ChangePrices extends Component {
         </ExpansionPanelSummary>
         <ExpansionPanelDetails>
           <FormControl>
-            {this.props.prices.map((e, i) => 
-              <TextField
-                id={"change_price" + i}
-                label="New price (wei)"
+            <FormHelperText>Ticket type to change</FormHelperText>
+            <Select
+              labelId="Ticket type to change"
+              value={this.state.ticketType}
+              onChange={e => this.setState({ticketType: e.target.value})}
+            >
+              {this.props.prices.map((e, i) => 
+                <MenuItem value={i}>{i+1}</MenuItem>
+              )}
+            </Select>
+            
+            <TextField 
+                id={"new_price"}
+                label="New price"
                 variant="outlined" 
                 margin="normal"
-                required={false}
+                required={true}
                 type="number"
-                defaultValue="0"
-                inputProps={{ min: "0", step: "1" }}
-                helperText={"Ticket type " + (i+1)} />
-            )}
+                defaultValue={this.props.prices[this.state.ticketType]}
+                onChange={e => this.setState({newPrice: e.target.value})}
+                inputProps={{ min: "1", step: "1" }}/>
+
             <Button
               variant="contained"
               onClick={() => { this.submit() }}
-              >Change</Button>
+              >Change price</Button>
           </FormControl>
         </ExpansionPanelDetails>
       </ExpansionPanel>
     );
+  }
+
+  submit = async () => {
+    try {
+      await this.props.contract.methods.change_ticket_price(
+        this.props.web3.utils.asciiToHex(this.props.eventId),
+        this.state.ticketType,
+        this.state.newPrice
+        ).send({from: this.props.accounts[0]});
+    } catch (error) {
+      console.log("Dev error: " + error.message);
+    }
   }
 }
