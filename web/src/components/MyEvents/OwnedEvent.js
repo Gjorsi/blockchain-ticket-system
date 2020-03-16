@@ -48,11 +48,11 @@ export default class OwnedEvent extends Component {
             <br/>
 
             <AddTickets
-              tickets={this.state.event.available_tickets}
-              prices={this.state.event.ticket_price}/>
+              {...this.props}
+              tickets={this.state.event.available_tickets}/>
 
             <ChangePrices
-              tickets={this.state.event.available_tickets}
+              {...this.props}
               prices={this.state.event.ticket_price}/>
 
             <br/>...Get customer list
@@ -79,7 +79,6 @@ export default class OwnedEvent extends Component {
 
   tickets_and_prices() {
     this.setState({ticket_list: []});
-    console.log(this.state.event.available_tickets.length);
     for (let i=0; i<this.state.event.available_tickets.length; i++) {
       
       this.setState(prevState => ({ ticket_list: [prevState.ticket_list, (
@@ -92,6 +91,7 @@ export default class OwnedEvent extends Component {
 }
 
 export class AddTickets extends Component {
+  addTickets = new Array(this.props.tickets.length).fill("0");
 
   render() {
     return(
@@ -110,17 +110,31 @@ export class AddTickets extends Component {
                 required={false}
                 type="number"
                 defaultValue="0"
+                onChange={e => this.addTickets[i] = e.target.value}
                 inputProps={{ min: "0", step: "1" }}
                 helperText={"Ticket type " + (i+1)} />
             )}
             <Button
               variant="contained"
+              color="primary"
               onClick={() => { this.submit() }}
               >Add</Button>
           </FormControl>
         </ExpansionPanelDetails>
       </ExpansionPanel>
     );
+  }
+
+  submit = async () => {
+    console.log(this.addTickets);
+    try {
+      await this.props.contract.methods.add_tickets(
+        this.props.web3.utils.asciiToHex(this.props.eventId),
+        this.addTickets
+        ).send({from: this.props.accounts[0]});
+    } catch (error) {
+      console.log("Dev error: " + error.message);
+    }
   }
 }
 
@@ -134,7 +148,7 @@ export class ChangePrices extends Component {
         </ExpansionPanelSummary>
         <ExpansionPanelDetails>
           <FormControl>
-            {this.props.tickets.map((e, i) => 
+            {this.props.prices.map((e, i) => 
               <TextField
                 id={"change_price" + i}
                 label="New price (wei)"
