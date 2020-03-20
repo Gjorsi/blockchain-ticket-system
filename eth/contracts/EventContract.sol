@@ -113,7 +113,7 @@ contract EventContract {
 
     for(uint64 i = 0; i < events[event_id].available_tickets.length ; i++) {
       // Check for integer overflow
-      require(events[event_id].available_tickets[i] + additional_tickets[i] > events[event_id].available_tickets[i],
+      require(events[event_id].available_tickets[i] + additional_tickets[i] >= events[event_id].available_tickets[i],
               "Cannot exceed 2^64-1 tickets");
       events[event_id].available_tickets[i] += additional_tickets[i];
     }
