@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { TextField, ExpansionPanel, ExpansionPanelSummary, Button, Select, FormHelperText, 
-ExpansionPanelDetails, Typography, Chip, Avatar, FormControl, MenuItem } from '@material-ui/core';
+ExpansionPanelDetails, Typography, Chip, Avatar, FormControl, MenuItem, List, ListItem } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 import { bytesToString } from '../../util/conversion.js';
@@ -8,7 +8,7 @@ import Web3 from 'web3';
 
 export default class OwnedEvent extends Component {
 
-  state = {};
+  state = {customer_list: []};
 
   componentDidMount = async () => {
     // extract list of owned events from all events
@@ -54,9 +54,21 @@ export default class OwnedEvent extends Component {
             <ChangePrices
               {...this.props}
               prices={this.state.event.ticket_price}/>
+            <br/>
 
-            <br/>...Get customer list
+            <div><Button
+              variant="contained"
+              color="primary"
+              onClick={() => { this.submit() }}
+              >Load customer list</Button></div>
 
+            <List dense={true}>
+              {this.state.customer_list.map(e => 
+                <ListItem>
+                  {e}
+                </ListItem>
+              )}
+            </List>
           </FormControl>
         </ExpansionPanelDetails>
       </ExpansionPanel>
@@ -85,6 +97,16 @@ export default class OwnedEvent extends Component {
           Ticket type {i+1} - Available tickets: {this.state.event.available_tickets[i]} | Ticket price: {this.state.event.ticket_price[i]}
         </div>
       )]}))
+    }
+  }
+
+  submit = async () => {
+    try {
+      this.setState({customer_list: await this.props.contract.methods.get_customers(
+        this.props.web3.utils.asciiToHex(this.props.eventId)
+        ).call({from: this.props.accounts[0]})});
+    } catch (error) {
+      console.log("Dev error: " + error.message);
     }
   }
 }
