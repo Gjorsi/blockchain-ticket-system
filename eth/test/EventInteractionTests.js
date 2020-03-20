@@ -19,6 +19,20 @@ contract('EventContract - Interaction tests', (accounts) => {
     events.push({ id: id, num_tickets: 1000, ticket_price: 1e16, per_customer_limit: false, max_per_customer: 0, owner: owner});
   });
 
+  it('Check no tickets reply', async () => {
+    let buyer = accounts[1];
+    try {
+      await eventC.get_participation({from:buyer});
+      assert.fail("Funtion get_participation should fail.")
+    } catch (error) {
+      if(error.message.search('Sender does not own any tickets') > -1) {
+        // correct outcome, test should pass
+      } else {
+        throw error;
+      }
+    }
+  });
+
   it('Attempt to buy tickets', async () => {
     let buyer = accounts[1];
     let tickets_to_buy = 1;
@@ -27,6 +41,9 @@ contract('EventContract - Interaction tests', (accounts) => {
 
     let buyers_tickets = await eventC.get_tickets(events[0].id, buyer, {from:owner});
     assert.equal(buyers_tickets, tickets_to_buy);
+
+    let part = await eventC.get_participation({from:buyer});
+    assert.equal(web3.utils.hexToUtf8(part[0]), web3.utils.hexToUtf8(events[0].id));
 
     tickets_to_buy = 5;
     purchase = await eventC.buy_tickets(events[0].id, 0, tickets_to_buy, {from: buyer, value: events[0].ticket_price*tickets_to_buy});
