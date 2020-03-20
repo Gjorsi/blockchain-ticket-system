@@ -5,18 +5,19 @@ contract EventContract {
   mapping(bytes32 => Event) public events;
   bytes32[] public event_id_list;
   uint8 public max_ticket_types = 100;
+  mapping(address => bytes32[]) public participation;
 
   struct Event { // attempt strict packaging
-    bytes32 event_id;
+    bytes32 event_id; //unique
     uint index;
     bytes32 title;
+    address payable owner;
+    uint64 max_per_customer;
+    uint128 funds;
     bool exists;
     bool sale_active;
     bool buyback_active;
     bool per_customer_limit;
-    uint64 max_per_customer;
-    uint128 funds;
-    address payable owner;
     uint64[] available_tickets;
     uint128[] ticket_prices;
     address[] customers;
@@ -24,11 +25,11 @@ contract EventContract {
   }
 
   struct Customer {
-    bool exists;
     uint index;
+    address addr;
+    bool exists;
     uint64 total_num_tickets;
     uint128 total_paid;
-    address addr;
     uint64[] num_tickets;
   }
 
@@ -116,6 +117,15 @@ contract EventContract {
     events[event_id].ticket_prices[ticket_type] = new_price;
   }
 
+  function delete_event(bytes32 event_id) external eventExists(event_id) onlyHost(event_id) {
+    uint old_index = events[event_id].index;
+    delete events[event_id];
+    events[event_id_list[event_id_list.length - 1]].index = old_index;
+    event_id_list[old_index] = event_id_list[event_id_list.length - 1];
+    delete event_id_list[event_id_list.length - 1];
+    event_id_list.length--;
+  }
+
 // ----- Public functions -----
 
   function buy_tickets(bytes32 event_id, uint64 ticket_type, uint64 requested_num_tickets) external payable {
@@ -144,6 +154,8 @@ contract EventContract {
     events[event_id].available_tickets[ticket_type] -= requested_num_tickets;
     events[event_id].funds += sum_price;
 
+    add_participation(event_id, msg.sender);
+
     // Return excessive funds
     if(msg.value > sum_price) {
       (bool success, ) = msg.sender.call.value(msg.value - sum_price)("");
@@ -169,6 +181,7 @@ contract EventContract {
     }
 
     delete_customer(event_id, msg.sender);
+    delete_participation(event_id, msg.sender);
 
     (bool success, ) = msg.sender.call.value(return_amount)("");
     require(success, "Return transfer to customer failed.");
@@ -201,13 +214,9 @@ contract EventContract {
     return event_id_list;
   }
 
-  function delete_event(bytes32 event_id) external eventExists(event_id) onlyHost(event_id) {
-    uint old_index = events[event_id].index;
-    delete events[event_id];
-    events[event_id_list[event_id_list.length - 1]].index = old_index;
-    event_id_list[old_index] = event_id_list[event_id_list.length - 1];
-    delete event_id_list[event_id_list.length - 1];
-    event_id_list.length--;
+  function get_participation() external view returns (bytes32[] memory event_participation) {
+    require(participation[msg.sender].length > 0, "Sender does not own any tickets.");
+    return participation[msg.sender];
   }
 
 // ----- Internal functions -----
@@ -219,6 +228,26 @@ contract EventContract {
     events[event_id].customers[old_index] = events[event_id].customers[events[event_id].customers.length - 1];
     delete events[event_id].customers[events[event_id].customers.length - 1];
     events[event_id].customers.length--;
+  }
+
+  function add_participation(bytes32 event_id, address customer_addr) internal {
+    for(uint64 i = 0; i < participation[customer_addr].length ; i++) {
+      if (participation[customer_addr][i] == event_id) {
+        return;
+      }
+    }
+    participation[customer_addr].push(event_id);
+  }
+
+  function delete_participation(bytes32 event_id, address customer_addr) internal {
+    uint len = participation[customer_addr].length;
+    for(uint64 i = 0; i < len ; i++) {
+      if (participation[customer_addr][i] == event_id) {
+        participation[customer_addr][i] = participation[customer_addr][len-1];
+        delete participation[customer_addr][len-1];
+        participation[customer_addr].length--;
+      }
+    }
   }
 
 }
