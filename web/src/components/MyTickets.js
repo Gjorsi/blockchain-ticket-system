@@ -8,9 +8,7 @@ export default class MyTickets extends Component {
 
   componentDidMount = async () => {
     // get events of which user owns tickets to
-    this.setState({participation: await this.props.contract.methods.get_participation().call()});
-
-    this.tickets_and_prices();
+    this.setState({participation: await this.props.contract.methods.get_participation().call({from: this.props.accounts[0]})});
   }
 
   render() {

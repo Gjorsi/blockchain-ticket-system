@@ -82,7 +82,8 @@ contract EventContract {
     require(success, "Withdrawal transfer failed.");
   }
 
-  function get_tickets(bytes32 event_id, address customer) external view returns (uint64[] memory) {
+  function get_tickets(bytes32 event_id, address customer) external view eventExists(event_id)
+        returns (uint64[] memory) {
     return events[event_id].tickets[customer].num_tickets;
   }
 
