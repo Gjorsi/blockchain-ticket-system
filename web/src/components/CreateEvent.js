@@ -1,9 +1,11 @@
 import React, { Component } from "react";
 import { Switch, TextField, FormControlLabel, Button } from '@material-ui/core';
+import DateFnsUtils from '@date-io/date-fns'
+import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from '@material-ui/pickers';
 
 export default class CreateEvent extends Component {
   state = {event_ID: null, event_title: null, sale_active: false, buyback_active: false, customer_limited: false, 
-        tickets_per_customer: 1, ticket_types: 1, price_table: [], button_disabled: true};
+        tickets_per_customer: 1, ticket_types: 1, price_table: [], deadline: null, button_disabled: true};
 
   componentDidMount() {
     this.set_ticket_types(1);
@@ -57,6 +59,27 @@ export default class CreateEvent extends Component {
           onChange={e => this.set_ticket_types(e.target.value)} /></div>
 
         {this.state.price_table}
+
+        <div>
+          <MuiPickersUtilsProvider utils={DateFnsUtils}>
+            <KeyboardDatePicker
+              id="deadline"
+              variant="inline"
+              format="yyyy-MM-dd"
+              margin="normal"
+              label="Choose a deadline date"
+              value={this.state.deadline}
+              onChange={d => this.update_deadline(d)}
+            />
+	    <KeyboardTimePicker
+              margin="normal"
+              id="time-picker"
+              label="Choose a deadline time"
+              value={this.state.deadline}
+              onChange={d => this.update_deadline(d)}
+            />
+          </MuiPickersUtilsProvider>
+        </div>
 
         <div><Button
           id="createButton"
@@ -118,6 +141,11 @@ export default class CreateEvent extends Component {
     }
   }
 
+  update_deadline = async (val) => {
+    await this.setState({deadline: val});
+    this.check_form();
+  }
+
   update_event_ID = async (val) => {
     await this.setState({event_ID: val});
     this.check_form();
@@ -138,6 +166,7 @@ export default class CreateEvent extends Component {
     if (typeof this.state.event_ID === "string" && this.state.event_ID.length < 1) return true;
     if (typeof this.state.title !== "string") return true;
     if (typeof this.state.title === "string" && this.state.title.length < 1) return true;
+    if (this.state.deadline == null) return true;
 
     for (let i=0; i<this.state.ticket_types; i++) {
       if (!this.tickets_avail[i] || !this.ticket_prices[i]) return true;
@@ -147,6 +176,7 @@ export default class CreateEvent extends Component {
   }
 
   submit = async () => {
+    console.log(Math.round(this.state.deadline.getTime() / 1000));
     try {
       await this.props.contract.methods.create_event(
         this.props.web3.utils.asciiToHex(this.state.event_ID),
@@ -156,7 +186,8 @@ export default class CreateEvent extends Component {
         this.state.customer_limited,
         this.state.tickets_per_customer,
         this.state.sale_active,
-        this.state.buyback_active
+        this.state.buyback_active,
+        this.state.deadline.getTime()
         ).send({from: this.props.accounts[0]});
     } catch (error) {
       console.log("Dev error: " + error);
