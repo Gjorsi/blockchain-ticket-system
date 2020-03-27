@@ -38,7 +38,7 @@ TabPanel.propTypes = {
   value: PropTypes.any.isRequired,
 };
 
-function a11yProps(index) {
+function tabProps(index) {
   return {
     id: `app-tab-${index}`,
     'aria-controls': `app-tabpanel-${index}`,
@@ -106,10 +106,10 @@ class App extends Component {
                 onChange={this.changeTab}
                 aria-label="simple tabs example"
             >
-                <Tab label="Browse events" {...a11yProps(0)} />
-                <Tab label="My tickets" {...a11yProps(1)} />
-                <Tab label="My events" {...a11yProps(2)} />
-                <Tab label="Create event" {...a11yProps(3)} />
+                <Tab label="Browse events" {...tabProps(0)} />
+                <Tab label="My tickets" {...tabProps(1)} />
+                <Tab label="My events" {...tabProps(2)} />
+                <Tab label="Create event" {...tabProps(3)} />
             </Tabs>
         </AppBar>
         <TabPanel value={this.state.activeTab} index={0}>
