@@ -176,7 +176,6 @@ export default class CreateEvent extends Component {
   }
 
   submit = async () => {
-    console.log(Math.round(this.state.deadline.getTime() / 1000));
     try {
       await this.props.contract.methods.create_event(
         this.props.web3.utils.asciiToHex(this.state.event_ID),
@@ -187,7 +186,7 @@ export default class CreateEvent extends Component {
         this.state.tickets_per_customer,
         this.state.sale_active,
         this.state.buyback_active,
-        this.state.deadline.getTime()
+        Math.round(this.state.deadline.getTime() / 1000)
         ).send({from: this.props.accounts[0]});
     } catch (error) {
       console.log("Dev error: " + error);
