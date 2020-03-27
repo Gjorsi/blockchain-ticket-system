@@ -49,6 +49,11 @@ contract EventContract {
       _;
   }
 
+  modifier afterDeadline(bytes32 event_id){
+      require(events[event_id].deadline < block.timestamp, "Event deadline has not yet passed");
+      _;
+  }
+
 // ----- Event host functions -----
 
   function create_event(bytes32 _event_id,
@@ -81,7 +86,7 @@ contract EventContract {
       event_id_list.push(_event_id);
   }
 
-  function withdraw_funds(bytes32 event_id) external eventExists(event_id) onlyHost(event_id) {
+  function withdraw_funds(bytes32 event_id) external eventExists(event_id) onlyHost(event_id) afterDeadline(event_id) {
     require(events[event_id].exists, "Event with given ID not found.");
     events[event_id].buyback_active = false;
     uint128 withdraw_amount = events[event_id].funds;
