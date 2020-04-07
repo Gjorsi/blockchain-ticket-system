@@ -1,13 +1,10 @@
 import React, { Component } from "react";
 import EventContract from "./contracts/EventContract.json";
 import getWeb3 from "./getWeb3";
-import AppBar from '@material-ui/core/AppBar';
-import Tabs from "@material-ui/core/Tabs";
-import Tab from "@material-ui/core/Tab";
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
+import { Button, Typography, AppBar, Tabs, Tab } from '@material-ui/core';
 
 import "./App.css";
 import CreateEvent from "./components/CreateEvent";
@@ -67,14 +64,12 @@ class App extends Component {
       // load list of event IDs
       let event_list = await instance.methods.get_events().call();
 
-      // cache all events
-      let events = new Map();
-      await Promise.all(event_list.map(async (event) => {
-        events.set(event, await instance.methods.get_event_info(event).call());
-      }));
-
       // Set web3, accounts, and contract to the state
-      this.setState({ web3, accounts, contract: instance, event_list: event_list, events: events });
+      this.setState({ web3, accounts, contract: instance, event_list: event_list});
+
+      // cache all events
+      this.load_events();
+
     } catch (error) {
       // Catch any errors for any of the above operations.
       alert(
@@ -83,6 +78,14 @@ class App extends Component {
       console.error(error);
     }
   };
+
+  load_events = async () => {
+    let events = new Map();
+    await Promise.all(this.state.event_list.map(async (event) => {
+      events.set(event, await this.state.contract.methods.get_event_info(event).call());
+    }));
+    this.setState({ events: events });
+  }
 
   changeTab = (event, value) => {
     this.setState({ activeTab: value });
@@ -98,6 +101,11 @@ class App extends Component {
  
       <div className="App">
         <AppBar position="static">
+            <Button
+              id="reload_events"
+              variant="contained"
+              onClick={() => { this.load_events() }}
+              >Reload events</Button>
             <Tabs
                 value={this.state.activeTab}
                 indicatorColor="primary"
