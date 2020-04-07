@@ -16,13 +16,11 @@ export default class EventListItem extends Component {
   }
 
   componentDidMount = async () => {
-    this.props.event_list.map(res => {
-      let e = this.props.events.get(res);
-      this.setState({
-        title: bytesToString(e.title),
-        tickets: e.available_tickets.map((a,i) => [a,e.ticket_price[i]]), // Create array of ticket types, with available tickets and price as a tuple
-        active: e.sale_active,
-      });
+
+    this.setState({
+      title: bytesToString(this.props.event.title),
+      tickets: this.props.event.available_tickets.map((a,i) => [a,this.props.event.ticket_price[i]]), // Create array of ticket types, with available tickets and price as a tuple
+      active: this.props.event.sale_active,
     });
   }
 

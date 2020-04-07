@@ -12,7 +12,7 @@ export default class EventList extends Component {
           <EventListItem 
             key={e}
             eventId={e}
-            {...this.props}
+            event={this.props.events.get(e)}
           />
         )}
       </div>
