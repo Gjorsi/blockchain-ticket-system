@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { TextField, ExpansionPanel, ExpansionPanelSummary, Button, Select, FormHelperText, 
-ExpansionPanelDetails, Typography, Chip, Avatar, FormControl, MenuItem, List, ListItem } from '@material-ui/core';
+ExpansionPanelDetails, Chip, Avatar, FormControl, MenuItem, List, ListItem } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 import { bytesToString } from '../../util/conversion.js';

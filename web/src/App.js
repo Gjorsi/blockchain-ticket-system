@@ -45,13 +45,6 @@ function tabProps(index) {
   };
 }
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    flexGrow: 1,
-    backgroundColor: theme.palette.background.paper,
-  },
-}));
-
 class App extends Component {
   state = { web3: null, accounts: null, contract: null, activeTab: 3 };
 

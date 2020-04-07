@@ -1,10 +1,9 @@
 import React, { Component } from "react";
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { TextField, ExpansionPanel, ExpansionPanelSummary, Button, 
-ExpansionPanelDetails, Typography, FormControl, List, ListItem } from '@material-ui/core';
+import {ExpansionPanel, ExpansionPanelSummary, Button, 
+ExpansionPanelDetails, FormControl, List, ListItem } from '@material-ui/core';
 
 import { bytesToString } from '../../util/conversion.js';
-import Web3 from 'web3';
 
 export default class TicketView extends Component {
   state = {customer: null}

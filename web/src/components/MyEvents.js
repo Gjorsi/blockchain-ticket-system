@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { TextField } from '@material-ui/core';
 import { bytesToString } from '../util/conversion.js';
 
 import OwnedEvent from './MyEvents/OwnedEvent.js';
