@@ -71,10 +71,17 @@ class App extends Component {
         deployedNetwork.address
       );
 
+      // load list of event IDs
       let event_list = await instance.methods.get_events().call();
 
+      // cache all events
+      let events = new Map();
+      await Promise.all(event_list.map(async (event) => {
+        events.set(event, await instance.methods.get_event_info(event).call());
+      }));
+
       // Set web3, accounts, and contract to the state
-      this.setState({ web3, accounts, contract: instance, events: event_list });
+      this.setState({ web3, accounts, contract: instance, event_list: event_list, events: events });
     } catch (error) {
       // Catch any errors for any of the above operations.
       alert(
@@ -123,7 +130,7 @@ class App extends Component {
               web3={this.state.web3} 
               accounts={this.state.accounts} 
               contract={this.state.contract}
-              events={this.state.events}/>
+              events={this.state.event_list}/>
         </TabPanel>
 
         <TabPanel value={this.state.activeTab} index={2}>
@@ -131,7 +138,7 @@ class App extends Component {
               web3={this.state.web3} 
               accounts={this.state.accounts} 
               contract={this.state.contract} 
-              events={this.state.events}/>
+              events={this.state.event_list}/>
         </TabPanel>
 
         <TabPanel value={this.state.activeTab} index={3}>

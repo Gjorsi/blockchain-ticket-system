@@ -8,10 +8,10 @@ contract EventContract {
   mapping(address => bytes32[]) public participation;
 
   struct Event { // attempt strict packaging
-    bytes32 event_id; //unique
-    uint index;
-    bytes32 title;
     address payable owner;
+    bytes32 event_id; //unique
+    bytes32 title;
+    uint index;
     uint64 max_per_customer;
     uint128 funds;
     bool exists;
