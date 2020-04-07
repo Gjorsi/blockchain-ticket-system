@@ -9,9 +9,6 @@ export default class TicketView extends Component {
   state = {customer: null}
 
   componentDidMount = async () => {
-    // get event of which user owns tickets to
-    this.setState({event: 
-      await this.props.contract.methods.get_event_info(this.props.eventId).call()});
 
     // get list of tickets
     this.setState({tickets: 
@@ -22,7 +19,7 @@ export default class TicketView extends Component {
     return(
       <ExpansionPanel>
         <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-          {!!(this.state.event)?bytesToString(this.state.event.title):"loading.."}
+          {!!(this.props.event)?bytesToString(this.props.event.title):"loading.."}
         </ExpansionPanelSummary>
         <ExpansionPanelDetails>
           <FormControl>
@@ -32,7 +29,7 @@ export default class TicketView extends Component {
             <Button
               color="secondary"
               variant="contained"
-              disabled={!!(this.state.event) ? !this.state.event.buyback_active : false}
+              disabled={!!(this.props.event) ? !this.props.event.buyback_active : false}
               onClick={() => { this.return_tickets() }}
               >Return all tickets</Button>
           </FormControl>

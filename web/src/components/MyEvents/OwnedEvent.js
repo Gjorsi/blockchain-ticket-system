@@ -11,35 +11,32 @@ export default class OwnedEvent extends Component {
   state = {customer_list: []};
 
   componentDidMount = async () => {
-    // extract list of owned events from all events
-    this.setState({event: await this.props.contract.methods.get_event_info(Web3.utils.asciiToHex(this.props.eventId)).call()});
-
     this.tickets_and_prices();
   }
 
   render() {
-    if (!this.state.event) {
+    if (!this.props.event) {
       return <div>Loading event data..</div>;
     }
 
     return (
       <ExpansionPanel>
         <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-          {!!(this.state.event)?bytesToString(this.state.event.title):"loading.."}
+          {!!(this.props.event)?bytesToString(this.props.event.title):"loading.."}
         </ExpansionPanelSummary>
         <ExpansionPanelDetails>
           <FormControl>
             <Chip
               avatar={<Avatar>S</Avatar>}
               label="Sale Status"
-              color={this.get_color(this.state.event.sale_active)}
+              color={this.get_color(this.props.event.sale_active)}
               clickable
-              onClick={() => this.handleActivateSale(this.state.event.sale_active)}
+              onClick={() => this.handleActivateSale(this.props.event.sale_active)}
               variant="outlined"/>
             <Chip
               avatar={<Avatar>B</Avatar>}
               label="Buyback Status"
-              color={this.get_color(this.state.event.buyback_active)}
+              color={this.get_color(this.props.event.buyback_active)}
               variant="outlined"/>
             <br/>
             <div>
@@ -49,11 +46,11 @@ export default class OwnedEvent extends Component {
 
             <AddTickets
               {...this.props}
-              tickets={this.state.event.available_tickets}/>
+              tickets={this.props.event.available_tickets}/>
 
             <ChangePrices
               {...this.props}
-              prices={this.state.event.ticket_price}/>
+              prices={this.props.event.ticket_price}/>
             <br/>
 
             <div><Button
@@ -82,19 +79,19 @@ export default class OwnedEvent extends Component {
 
   handleActivateSale = async (activator) => {
     if (activator) {
-      await this.props.contract.methods.stop_sale(Web3.utils.asciiToHex(this.props.eventId)).send({from: this.props.accounts[0]});
+      await this.props.contract.methods.stop_sale(this.props.eventId).send({from: this.props.accounts[0]});
     } else {
-      await this.props.contract.methods.continue_sale(Web3.utils.asciiToHex(this.props.eventId)).send({from: this.props.accounts[0]});
+      await this.props.contract.methods.continue_sale(this.props.eventId).send({from: this.props.accounts[0]});
     }
   }
 
   tickets_and_prices() {
     this.setState({ticket_list: []});
-    for (let i=0; i<this.state.event.available_tickets.length; i++) {
+    for (let i=0; i<this.props.event.available_tickets.length; i++) {
       
       this.setState(prevState => ({ ticket_list: [prevState.ticket_list, (
         <div>
-          Ticket type {i+1} - Available tickets: {this.state.event.available_tickets[i]} | Ticket price: {this.state.event.ticket_price[i]}
+          Ticket type {i+1} - Available tickets: {this.props.event.available_tickets[i]} | Ticket price: {this.props.event.ticket_price[i]}
         </div>
       )]}))
     }
@@ -103,7 +100,7 @@ export default class OwnedEvent extends Component {
   submit = async () => {
     try {
       this.setState({customer_list: await this.props.contract.methods.get_customers(
-        this.props.web3.utils.asciiToHex(this.props.eventId)
+        this.props.eventId
         ).call({from: this.props.accounts[0]})});
     } catch (error) {
       console.log("Dev error: " + error.message);
@@ -149,7 +146,7 @@ export class AddTickets extends Component {
   submit = async () => {
     try {
       await this.props.contract.methods.add_tickets(
-        this.props.web3.utils.asciiToHex(this.props.eventId),
+        this.props.eventId,
         this.addTickets
         ).send({from: this.props.accounts[0]});
     } catch (error) {
@@ -204,7 +201,7 @@ export class ChangePrices extends Component {
   submit = async () => {
     try {
       await this.props.contract.methods.change_ticket_price(
-        this.props.web3.utils.asciiToHex(this.props.eventId),
+        this.props.eventId,
         this.state.ticketType,
         this.state.newPrice
         ).send({from: this.props.accounts[0]});

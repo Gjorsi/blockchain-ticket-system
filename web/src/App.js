@@ -115,23 +115,24 @@ class App extends Component {
         <TabPanel value={this.state.activeTab} index={0}>
           <BrowseEvents 
             contract={this.state.contract} 
-            accounts={this.state.accounts}/>
+            accounts={this.state.accounts}
+            event_list={this.state.event_list}
+            events={this.state.events}/>
         </TabPanel>
 
         <TabPanel value={this.state.activeTab} index={1}>
             <MyTickets 
-              web3={this.state.web3} 
               accounts={this.state.accounts} 
               contract={this.state.contract}
-              events={this.state.event_list}/>
+              events={this.state.events}/>
         </TabPanel>
 
         <TabPanel value={this.state.activeTab} index={2}>
-            <MyEvents 
-              web3={this.state.web3} 
+            <MyEvents
               accounts={this.state.accounts} 
               contract={this.state.contract} 
-              events={this.state.event_list}/>
+              event_list={this.state.event_list}
+              events={this.state.events}/>
         </TabPanel>
 
         <TabPanel value={this.state.activeTab} index={3}>

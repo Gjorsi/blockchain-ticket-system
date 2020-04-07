@@ -17,11 +17,11 @@ export default class MyTickets extends Component {
         {!!(this.state.participation)?this.state.participation.map((e, i) =>
           <TicketView
             key={i}
-            web3={this.props.web3} 
             accounts={this.props.accounts} 
             contract={this.props.contract}
-            eventId={e} />
-        ):"loading.."}
+            eventId={e}
+            event={this.props.events.get(e)} />
+        ):"No tickets found.."}
       </div>
     );
   }
