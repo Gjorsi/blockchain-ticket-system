@@ -85,6 +85,7 @@ class App extends Component {
       events.set(event, await this.state.contract.methods.get_event_info(event).call());
     }));
     this.setState({ events: events });
+    console.log(this.state.events);
   }
 
   changeTab = (event, value) => {

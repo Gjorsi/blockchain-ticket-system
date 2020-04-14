@@ -8,7 +8,10 @@ import Web3 from 'web3';
 
 export default class OwnedEvent extends Component {
 
-  state = {customer_list: []};
+  constructor() {
+    super();
+    this.state = {customer_list: [], ticket_list: []}
+  }
 
   componentDidMount = async () => {
     this.tickets_and_prices();
@@ -86,7 +89,6 @@ export default class OwnedEvent extends Component {
   }
 
   tickets_and_prices() {
-    this.setState({ticket_list: []});
     for (let i=0; i<this.props.event.available_tickets.length; i++) {
       
       this.setState(prevState => ({ ticket_list: [prevState.ticket_list, (
