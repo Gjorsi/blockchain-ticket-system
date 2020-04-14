@@ -4,7 +4,6 @@ ExpansionPanelDetails, Chip, Avatar, FormControl, MenuItem, List, ListItem } fro
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 import { bytesToString } from '../../util/conversion.js';
-import Web3 from 'web3';
 
 export default class OwnedEvent extends Component {
 

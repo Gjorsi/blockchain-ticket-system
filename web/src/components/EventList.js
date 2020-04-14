@@ -13,6 +13,7 @@ export default class EventList extends Component {
             key={e}
             eventId={e}
             event={this.props.events.get(e)}
+            {...this.props}
           />
         )}
       </div>

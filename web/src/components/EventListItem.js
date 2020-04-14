@@ -29,21 +29,29 @@ export default class EventListItem extends Component {
       <ExpansionPanel>
         <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
           <Typography className="heading">
-            {this.state.title}
+            {bytesToString(this.props.event.title)}
           </Typography>
           <Typography className="secondaryHeading">
-            {this.state.tickets.reduce((a,b)=>a+parseInt(b),0)} available tickets
+            {this.total_available_tickets()} available tickets
           </Typography>
         </ExpansionPanelSummary>
         <ExpansionPanelDetails className="expansionPanelDetails">
           <BuyTicket 
-            tickets={this.state.tickets} 
+            tickets={this.state.tickets}
             key={this.state.tickets.length}
             {...this.props}
           />
         </ExpansionPanelDetails>
       </ExpansionPanel>
     );
+  }
+
+  total_available_tickets() {
+    let sum = 0;
+    for (let i=0; i < this.props.event.available_tickets.length; i++) {
+      sum += parseInt(this.props.event.available_tickets[i]);
+    }
+    return sum;
   }
 }
 
@@ -65,7 +73,8 @@ export class BuyTicket extends Component {
       let total_value = this.props.tickets[this.state.ticket_type][1]*this.state.num;
       await this.props.contract.methods.buy_tickets(this.props.eventId, this.state.ticket_type, this.state.num)
         .send({from: this.props.accounts[0], value: total_value});
-    } catch {
+    } catch (error){
+      console.log(error.message);
     }
   }
 
@@ -85,12 +94,13 @@ export class BuyTicket extends Component {
           name="ticket_type"
           onChange={this.handleChange}
         >
-        {this.props.tickets.map(([avail,price], i) => 
+        {this.props.event.available_tickets.map((e, i) => 
         <>
           <FormControlLabel
             value={i}
             control={<Radio />}
-            label={"Type "+(i+1)+": "+price+" wei"}
+            label={"Type "+(i+1)+" - Price: "+this.props.event.ticket_price[i]+
+                    " wei | Available: "+this.props.event.available_tickets[i]}
           />
         </>
         )}
