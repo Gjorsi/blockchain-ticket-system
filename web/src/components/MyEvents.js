@@ -21,10 +21,6 @@ export default class MyEvents extends Component {
     this.setState({owned_events: this.owned_events});
   }
 
-  componentDidUpdate() {
-    console.log(this.props.events);
-  }
-
   render() {
     return (
       <div>

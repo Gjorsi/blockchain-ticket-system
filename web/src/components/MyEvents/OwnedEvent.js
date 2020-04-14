@@ -13,10 +13,6 @@ export default class OwnedEvent extends Component {
     this.state = {customer_list: [], ticket_list: []}
   }
 
-  componentDidMount = async () => {
-    this.tickets_and_prices();
-  }
-
   render() {
     if (!this.props.event) {
       return <div>Loading event data..</div>;
@@ -42,9 +38,14 @@ export default class OwnedEvent extends Component {
               color={this.get_color(this.props.event.buyback_active)}
               variant="outlined"/>
             <br/>
-            <div>
-              {this.state.ticket_list}
-            </div>
+
+            <List dense={true}>
+              {this.props.event.available_tickets.map((e,i) => 
+                <ListItem>
+                  Ticket type {i+1} - Available tickets: {this.props.event.available_tickets[i]} | Ticket price: {this.props.event.ticket_price[i]}
+                </ListItem>
+              )}
+            </List>
             <br/>
 
             <AddTickets
@@ -85,17 +86,6 @@ export default class OwnedEvent extends Component {
       await this.props.contract.methods.stop_sale(this.props.eventId).send({from: this.props.accounts[0]});
     } else {
       await this.props.contract.methods.continue_sale(this.props.eventId).send({from: this.props.accounts[0]});
-    }
-  }
-
-  tickets_and_prices() {
-    for (let i=0; i<this.props.event.available_tickets.length; i++) {
-      
-      this.setState(prevState => ({ ticket_list: [prevState.ticket_list, (
-        <div>
-          Ticket type {i+1} - Available tickets: {this.props.event.available_tickets[i]} | Ticket price: {this.props.event.ticket_price[i]}
-        </div>
-      )]}))
     }
   }
 
