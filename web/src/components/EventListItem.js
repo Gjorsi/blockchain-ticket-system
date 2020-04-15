@@ -37,7 +37,6 @@ export default class EventListItem extends Component {
         </ExpansionPanelSummary>
         <ExpansionPanelDetails className="expansionPanelDetails">
           <BuyTicket 
-            tickets={this.state.tickets}
             key={this.state.tickets.length}
             {...this.props}
           />
@@ -70,7 +69,7 @@ export class BuyTicket extends Component {
 
   buyTickets = async () => {
     try {
-      let total_value = this.props.tickets[this.state.ticket_type][1]*this.state.num;
+      let total_value = this.props.event.ticket_price[this.state.ticket_type]*this.state.num;
       await this.props.contract.methods.buy_tickets(this.props.eventId, this.state.ticket_type, this.state.num)
         .send({from: this.props.accounts[0], value: total_value});
     } catch (error){
@@ -80,8 +79,8 @@ export class BuyTicket extends Component {
 
   render() {
     let total_price;
-    if(this.props.tickets.length > 0){
-      total_price = this.props.tickets[this.state.ticket_type][1]*this.state.num;
+    if(this.props.event.ticket_price.length > 0){
+      total_price = this.props.event.ticket_price[this.state.ticket_type]*this.state.num;
     } else {
       total_price = 0;
     }
