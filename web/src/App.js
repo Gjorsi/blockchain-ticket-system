@@ -4,7 +4,7 @@ import getWeb3 from "./getWeb3";
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
-import { Button, Typography, AppBar, Tabs, Tab } from '@material-ui/core';
+import { Button, Typography, AppBar, Tabs, Tab, Backdrop, CircularProgress, FormControl } from '@material-ui/core';
 
 import "./App.css";
 import CreateEvent from "./components/CreateEvent";
@@ -42,6 +42,19 @@ function tabProps(index) {
     id: `app-tab-${index}`,
     'aria-controls': `app-tabpanel-${index}`,
   };
+}
+
+function SimpleBackdrop() {
+  return (
+    <div>
+      <Backdrop  open={true}>
+        <FormControl>
+          <CircularProgress color="inherit" />
+          Loading contract data...
+        </FormControl>
+      </Backdrop>
+    </div>
+  );
 }
 
 class App extends Component {
@@ -114,7 +127,7 @@ class App extends Component {
   render() {
 
     if (!this.state.web3 || !this.state.events) {
-      return <div>Loading Web3, accounts, and contract...</div>;
+      return <SimpleBackdrop/>;
     }
 
     return (
