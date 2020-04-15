@@ -12,6 +12,8 @@ import BrowseEvents from "./components/BrowseEvents";
 import MyTickets from "./components/MyTickets";
 import MyEvents from "./components/MyEvents";
 
+import { bytesToString } from './util/conversion.js';
+
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
 
@@ -61,14 +63,14 @@ class App extends Component {
         deployedNetwork.address
       );
 
-      // load list of event IDs
-      let event_list = await instance.methods.get_events().call();
-
       // Set web3, accounts, and contract to the state
-      this.setState({ web3, accounts, contract: instance, event_list: event_list});
+      this.setState({ web3, accounts, contract: instance});
+
+      // load list of event IDs
+      await this.load_event_list();
 
       // cache all events
-      this.load_events();
+      await this.load_events();
 
     } catch (error) {
       // Catch any errors for any of the above operations.
@@ -79,6 +81,16 @@ class App extends Component {
     }
   };
 
+  load_event_list = async () => {
+    let event_list = await this.state.contract.methods.get_events().call();
+    this.setState({event_list: event_list});
+  }
+
+  new_event = async (event_id) => {
+    await this.load_event_list();
+    this.reload_event(event_id);
+  }
+
   load_events = async () => {
     let events = new Map();
     await Promise.all(this.state.event_list.map(async (event) => {
@@ -87,11 +99,11 @@ class App extends Component {
     this.setState({ events: events });
   }
 
-  reload_event = async (event) => {
-    let updated_event = await this.state.contract.methods.get_event_info(event).call();
+  reload_event = async (event_id) => {
+    let updated_event = await this.state.contract.methods.get_event_info(event_id).call();
     this.setState((prevState) => {
-      let updatedEvents = new Map(prevState.events)
-      return { events: updatedEvents.set(event, updated_event) }
+      let updatedEvents = new Map(prevState.events);
+      return { events: updatedEvents.set(event_id, updated_event)};
     });
   }
 
@@ -101,7 +113,7 @@ class App extends Component {
 
   render() {
 
-    if (!this.state.web3) {
+    if (!this.state.web3 || !this.state.events) {
       return <div>Loading Web3, accounts, and contract...</div>;
     }
 
@@ -133,7 +145,8 @@ class App extends Component {
             contract={this.state.contract} 
             accounts={this.state.accounts}
             event_list={this.state.event_list}
-            events={this.state.events}/>
+            events={this.state.events}
+            reload_event={this.reload_event}/>
         </TabPanel>
 
         <TabPanel value={this.state.activeTab} index={1}>
@@ -156,7 +169,8 @@ class App extends Component {
             <CreateEvent 
               web3={this.state.web3} 
               accounts={this.state.accounts} 
-              contract={this.state.contract}/>
+              contract={this.state.contract}
+              new_event_update={this.new_event}/>
         </TabPanel>
 
       </div>

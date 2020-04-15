@@ -87,7 +87,7 @@ export default class OwnedEvent extends Component {
       } else {
         await this.props.contract.methods.continue_sale(this.props.eventId).send({from: this.props.accounts[0]});
       }
-      this.props.reload_event(this.props.eventId);
+      this.props.reload_event(this.props.eventId); //call to App.js to reload affected event
     
     } catch (error) {
       console.log("Dev error: " + error.message);
@@ -146,7 +146,7 @@ export class AddTickets extends Component {
         this.props.eventId,
         this.addTickets
         ).send({from: this.props.accounts[0]});
-      this.props.reload_event(this.props.eventId);
+      this.props.reload_event(this.props.eventId); //call to App.js to reload affected event
 
     } catch (error) {
       console.log("Dev error: " + error.message);
@@ -204,7 +204,7 @@ export class ChangePrices extends Component {
         this.state.ticketType,
         this.state.newPrice
         ).send({from: this.props.accounts[0]});
-      this.props.reload_event(this.props.eventId);
+      this.props.reload_event(this.props.eventId); //call to App.js to reload affected event
 
     } catch (error) {
       console.log("Dev error: " + error.message);

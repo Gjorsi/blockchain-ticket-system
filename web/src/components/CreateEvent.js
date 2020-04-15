@@ -188,6 +188,11 @@ export default class CreateEvent extends Component {
         this.state.buyback_active,
         Math.round(this.state.deadline.getTime() / 1000)
         ).send({from: this.props.accounts[0]});
+      this.props.new_event_update(
+        this.props.web3.utils.padRight(
+          this.props.web3.utils.asciiToHex(
+            this.state.event_ID), 
+            64)); //call App.js to update event list and load the event into cache
     } catch (error) {
       console.log("Dev error: " + error);
     }

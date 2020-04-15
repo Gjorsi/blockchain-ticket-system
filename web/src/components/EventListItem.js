@@ -58,6 +58,8 @@ export class BuyTicket extends Component {
       let total_value = this.props.event.ticket_price[this.state.ticket_type]*this.state.num;
       await this.props.contract.methods.buy_tickets(this.props.eventId, this.state.ticket_type, this.state.num)
         .send({from: this.props.accounts[0], value: total_value});
+      this.props.reload_event(this.props.eventId); //call to App.js to reload affected event
+
     } catch (error){
       console.log(error.message);
     }
@@ -96,6 +98,7 @@ export class BuyTicket extends Component {
           required={true}
           variant="outlined"
           inputProps={{min: "1", step: "1"}}
+          defaultValue={1}
           onChange={this.handleChange}
         />
         </RadioGroup>
