@@ -30,7 +30,8 @@ export default class MyEvents extends Component {
             accounts={this.props.accounts} 
             contract={this.props.contract}
             eventId={e} 
-            event={this.props.events.get(e)} />
+            event={this.props.events.get(e)}
+            reload_event={this.props.reload_event}/>
         )}
       </div>
     );

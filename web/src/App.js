@@ -87,6 +87,14 @@ class App extends Component {
     this.setState({ events: events });
   }
 
+  reload_event = async (event) => {
+    let updated_event = await this.state.contract.methods.get_event_info(event).call();
+    this.setState((prevState) => {
+      let updatedEvents = new Map(prevState.events)
+      return { events: updatedEvents.set(event, updated_event) }
+    });
+  }
+
   changeTab = (event, value) => {
     this.setState({ activeTab: value });
   }
@@ -140,7 +148,8 @@ class App extends Component {
               accounts={this.state.accounts} 
               contract={this.state.contract} 
               event_list={this.state.event_list}
-              events={this.state.events}/>
+              events={this.state.events}
+              reload_event={this.reload_event}/>
         </TabPanel>
 
         <TabPanel value={this.state.activeTab} index={3}>

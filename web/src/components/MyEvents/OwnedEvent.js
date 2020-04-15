@@ -59,7 +59,7 @@ export default class OwnedEvent extends Component {
             <div><Button
               variant="contained"
               color="primary"
-              onClick={() => { this.submit() }}
+              onClick={() => { this.get_customer_list() }}
               >Load customer list</Button></div>
 
             <List dense={true}>
@@ -81,14 +81,20 @@ export default class OwnedEvent extends Component {
   }
 
   handleActivateSale = async (activator) => {
-    if (activator) {
-      await this.props.contract.methods.stop_sale(this.props.eventId).send({from: this.props.accounts[0]});
-    } else {
-      await this.props.contract.methods.continue_sale(this.props.eventId).send({from: this.props.accounts[0]});
+    try {
+      if (activator) {
+        await this.props.contract.methods.stop_sale(this.props.eventId).send({from: this.props.accounts[0]});
+      } else {
+        await this.props.contract.methods.continue_sale(this.props.eventId).send({from: this.props.accounts[0]});
+      }
+      this.props.reload_event(this.props.eventId);
+    
+    } catch (error) {
+      console.log("Dev error: " + error.message);
     }
   }
 
-  submit = async () => {
+  get_customer_list = async () => {
     try {
       this.setState({customer_list: await this.props.contract.methods.get_customers(
         this.props.eventId
@@ -140,6 +146,8 @@ export class AddTickets extends Component {
         this.props.eventId,
         this.addTickets
         ).send({from: this.props.accounts[0]});
+      this.props.reload_event(this.props.eventId);
+
     } catch (error) {
       console.log("Dev error: " + error.message);
     }
@@ -196,6 +204,8 @@ export class ChangePrices extends Component {
         this.state.ticketType,
         this.state.newPrice
         ).send({from: this.props.accounts[0]});
+      this.props.reload_event(this.props.eventId);
+
     } catch (error) {
       console.log("Dev error: " + error.message);
     }
