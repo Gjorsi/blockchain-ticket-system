@@ -10,19 +10,6 @@ import { bytesToString } from '../util/conversion.js';
 import './EventList.css';
 
 export default class EventListItem extends Component {
-  constructor(props){
-    super(props);
-    this.state = {title: null, tickets: [], prices: [], active: false}
-  }
-
-  componentDidMount = async () => {
-
-    this.setState({
-      title: bytesToString(this.props.event.title),
-      tickets: this.props.event.available_tickets.map((a,i) => [a,this.props.event.ticket_price[i]]), // Create array of ticket types, with available tickets and price as a tuple
-      active: this.props.event.sale_active,
-    });
-  }
 
   render() {
     return (
@@ -37,7 +24,6 @@ export default class EventListItem extends Component {
         </ExpansionPanelSummary>
         <ExpansionPanelDetails className="expansionPanelDetails">
           <BuyTicket 
-            key={this.state.tickets.length}
             {...this.props}
           />
         </ExpansionPanelDetails>
