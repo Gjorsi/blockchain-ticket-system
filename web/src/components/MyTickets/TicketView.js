@@ -9,8 +9,11 @@ export default class TicketView extends Component {
   state = {customer: null}
 
   componentDidMount = async () => {
-
     // get list of tickets
+    this.load_tickets();
+  }
+
+  load_tickets = async () => {
     this.setState({tickets: 
       await this.props.contract.methods.get_tickets(this.props.eventId, this.props.accounts[0]).call()});
   }
@@ -24,12 +27,11 @@ export default class TicketView extends Component {
         <ExpansionPanelDetails>
           <FormControl>
             
-            {!!(this.state.tickets)?this.list_tickets():"loading.."}
-
+            {!!(this.state.tickets) ? this.list_tickets() : "loading.."}
             <Button
               color="secondary"
               variant="contained"
-              disabled={!!(this.props.event) ? !this.props.event.buyback_active : false}
+              disabled={this.can_return_tickets()}
               onClick={() => { this.return_tickets() }}
               >Return all tickets</Button>
           </FormControl>
@@ -38,19 +40,33 @@ export default class TicketView extends Component {
     );
   }
 
+  can_return_tickets() {
+    return !!(this.state.tickets) ? 
+      (!this.props.event.buyback_active || !this.props.event.sale_active || (this.state.tickets.length < 1)) :
+      true;
+  }
+
   return_tickets = async () => {
     await this.props.contract.methods.return_tickets(this.props.eventId).send({from: this.props.accounts[0]});
+    this.load_tickets();
   }
 
   list_tickets() {
-    return(
-      <List dense={true}>
-        {this.state.tickets.map((e, i) => 
-          {if(e > 0){
-            return <ListItem>Tickets of type {i+1}: {e}</ListItem>
-          }}
-        )}
-      </List>
-    );
+    if (this.state.tickets.length > 0) {
+      return(
+        <List dense={true}>
+          {this.state.tickets.map((e, i) => 
+            {if(e > 0){
+              return <ListItem>Tickets of type {i+1}: {e}</ListItem>
+            }}
+          )}
+        </List>
+      );
+    } else {
+      return(
+        <div>No tickets found.</div>
+      );
+    }
+    
   }
 }

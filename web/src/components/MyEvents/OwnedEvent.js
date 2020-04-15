@@ -9,7 +9,7 @@ export default class OwnedEvent extends Component {
 
   constructor() {
     super();
-    this.state = {customer_list: [], ticket_list: []}
+    this.state = {customer_list: []}
   }
 
   render() {
