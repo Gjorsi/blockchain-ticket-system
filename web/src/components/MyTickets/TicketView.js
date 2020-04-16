@@ -47,8 +47,21 @@ export default class TicketView extends Component {
   }
 
   return_tickets = async () => {
-    await this.props.contract.methods.return_tickets(this.props.eventId).send({from: this.props.accounts[0]});
-    this.load_tickets();
+    let failed = true;
+    //await this.props.contract.methods.return_tickets(this.props.eventId).send({from: this.props.accounts[0]});
+    await this.props.contract.methods.return_tickets(this.props.eventId).estimateGas({from: this.props.accounts[0]})
+    .then(function(gasAmount){
+      failed = false;
+    })
+    .catch(function(error){
+      console.log(error);
+    });
+
+    if (!failed) {
+      await this.props.contract.methods.return_tickets(this.props.eventId).send({from: this.props.accounts[0]});
+      this.load_tickets();
+    }
+
   }
 
   list_tickets() {

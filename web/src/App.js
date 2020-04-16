@@ -76,6 +76,8 @@ class App extends Component {
         deployedNetwork.address
       );
 
+      instance.options.handleRevert = true;
+
       // Set web3, accounts, and contract to the state
       this.setState({ web3, accounts, contract: instance});
 
