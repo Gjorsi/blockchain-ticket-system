@@ -189,7 +189,7 @@ contract EventContract {
     for(uint64 i = 0; i < events[event_id].available_tickets.length ; i++) {
       // Check for integer overflow
       require(events[event_id].available_tickets[i] +
-        events[event_id].tickets[msg.sender].num_tickets[i] >
+        events[event_id].tickets[msg.sender].num_tickets[i] >=
         events[event_id].available_tickets[i],
         "Failed because returned tickets would increase ticket pool past storage limit.");
       events[event_id].available_tickets[i] += events[event_id].tickets[msg.sender].num_tickets[i];
@@ -261,6 +261,7 @@ contract EventContract {
         participation[customer_addr][i] = participation[customer_addr][len-1];
         delete participation[customer_addr][len-1];
         participation[customer_addr].length--;
+        break;
       }
     }
   }
