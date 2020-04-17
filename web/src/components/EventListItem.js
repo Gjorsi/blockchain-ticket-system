@@ -47,10 +47,30 @@ export class BuyTicket extends Component {
     this.buyTickets = this.buyTickets.bind(this);
   }
 
-  state = {ticket_type: 0, num: 1};
+  state = {
+    ticket_type: 0, 
+    num: 1, 
+    button_state: this.props.event.available_tickets[0] > 0, 
+    total: this.convert_to_eth(this.props.event.ticket_price[0])};
 
-  handleChange(event){
-    this.setState({[event.target.name]: parseInt(event.target.value)});
+  handleChange = async (event) => {
+    await this.setState({[event.target.name]: parseInt(event.target.value)});
+    await this.setState({total: this.convert_to_eth(this.props.event.ticket_price[this.state.ticket_type]*this.state.num)});
+    this.setState({button_state: this.check_choice() && this.state.total !== "invalid"})
+  }
+
+  check_choice() {
+    return (!!this.state.num && this.props.event.available_tickets[this.state.ticket_type] >= this.state.num);
+  }
+
+  convert_to_eth(val) {
+    let r;
+    try{
+      r = this.props.web3.utils.fromWei(val.toString()) + " ETH";
+    } catch(e) {
+      r="invalid";
+    }
+    return r;
   }
 
   buyTickets = async () => {
@@ -66,12 +86,6 @@ export class BuyTicket extends Component {
   }
 
   render() {
-    let total_price;
-    if(this.props.event.ticket_price.length > 0){
-      total_price = this.props.event.ticket_price[this.state.ticket_type]*this.state.num;
-    } else {
-      total_price = 0;
-    }
 
     return(
       <>
@@ -97,17 +111,19 @@ export class BuyTicket extends Component {
           label="Number of tickets"
           required={true}
           variant="outlined"
-          inputProps={{min: "1", step: "1"}}
+          disabled={!this.props.event.sale_active}
+          helperText={!this.props.event.sale_active ? "Sale is closed for this event." : ""}
+          inputProps={{min: "1", max:this.props.event.available_tickets[this.state.ticket_type], step: "1"}}
           defaultValue={1}
           onChange={this.handleChange}
         />
         </RadioGroup>
-        Total: {total_price || 0} wei
+        Total: {this.state.total}
         <Button
           variant="contained"
+          disabled={!this.state.button_state || !this.props.event.sale_active}
           onClick={this.buyTickets}
-        >
-          Buy tickets
+        > Buy tickets
         </Button>
       </FormControl>
       </>

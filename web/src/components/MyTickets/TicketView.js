@@ -33,7 +33,7 @@ export default class TicketView extends Component {
               variant="contained"
               disabled={this.can_return_tickets()}
               onClick={() => { this.return_tickets() }}
-              >Return all tickets</Button>
+              >{!this.can_return_tickets() ? "Return All Tickets" : "Ticket return is disabled"}</Button>
           </FormControl>
         </ExpansionPanelDetails>
       </ExpansionPanel>
