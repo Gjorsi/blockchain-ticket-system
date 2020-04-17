@@ -55,7 +55,7 @@ export default class CreateEvent extends Component {
           required={true}
           type="number"
           defaultValue={1}
-          inputProps={{ min: "1", max: "50", step: "1" }}
+          inputProps={{ min: "1", max: "15", step: "1" }}
           onChange={e => this.set_ticket_types(e.target.value)} /></div>
 
         {this.state.price_table}
@@ -107,6 +107,7 @@ export default class CreateEvent extends Component {
   }
 
   set_ticket_types = async (val) => {
+    val = Math.min(val,15);
     await this.setState({ticket_types: val});
     this.tickets_and_prices();
     this.tickets_avail = new Array(val);
