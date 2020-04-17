@@ -5,7 +5,7 @@ import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from 
 
 export default class CreateEvent extends Component {
   state = {event_ID: null, event_title: null, sale_active: false, buyback_active: false, customer_limited: false, 
-        tickets_per_customer: 1, ticket_types: 1, price_table: [], deadline: null, button_disabled: true};
+        tickets_per_customer: 1, ticket_types: 1, price_table: [], deadline: null, button_disabled: true, event_ID_helperText: ""};
 
   componentDidMount() {
     this.set_ticket_types(1);
@@ -13,6 +13,7 @@ export default class CreateEvent extends Component {
 
   tickets_avail = [];
   ticket_prices = [];
+  event_ID_hex = "";
 
   render() {
     return (
@@ -22,6 +23,7 @@ export default class CreateEvent extends Component {
         <TextField 
           id="event_ID" 
           label="Unique event ID" 
+          helperText={this.state.event_ID_helperText}
           variant="outlined" 
           required={true} 
           onChange={e => this.update_event_ID(e.target.value) } />
@@ -153,6 +155,10 @@ export default class CreateEvent extends Component {
 
   update_event_ID = async (val) => {
     await this.setState({event_ID: val});
+    this.event_ID_hex = this.props.web3.utils.padRight(
+          this.props.web3.utils.asciiToHex(
+            this.state.event_ID), 64);
+    
     this.check_form();
   }
 
@@ -169,6 +175,12 @@ export default class CreateEvent extends Component {
   check_fields() {
     if (typeof this.state.event_ID !== "string") return true;
     if (typeof this.state.event_ID === "string" && this.state.event_ID.length < 1) return true;
+
+    if (this.props.event_list.includes(this.event_ID_hex)) {
+      this.setState({event_ID_helperText: "Event ID is not available."});
+      return true;
+    } else this.setState({event_ID_helperText: "Event ID is available."});
+      
     if (typeof this.state.title !== "string") return true;
     if (typeof this.state.title === "string" && this.state.title.length < 1) return true;
     if (this.state.deadline == null) return true;

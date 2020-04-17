@@ -184,6 +184,7 @@ class App extends Component {
 
         <TabPanel value={this.state.activeTab} index={3}>
             <CreateEvent 
+              event_list={this.state.event_list}
               web3={this.state.web3} 
               accounts={this.state.accounts} 
               contract={this.state.contract}
