@@ -161,7 +161,8 @@ class App extends Component {
             accounts={this.state.accounts}
             event_list={this.state.event_list}
             events={this.state.events}
-            reload_event={this.reload_event}/>
+            reload_event={this.reload_event}
+            web3={this.state.web3}/>
         </TabPanel>
 
         <TabPanel value={this.state.activeTab} index={1}>
@@ -177,7 +178,8 @@ class App extends Component {
               contract={this.state.contract} 
               event_list={this.state.event_list}
               events={this.state.events}
-              reload_event={this.reload_event}/>
+              reload_event={this.reload_event}
+              web3={this.state.web3}/>
         </TabPanel>
 
         <TabPanel value={this.state.activeTab} index={3}>

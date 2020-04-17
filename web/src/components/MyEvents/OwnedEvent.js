@@ -41,7 +41,9 @@ export default class OwnedEvent extends Component {
             <List dense={true}>
               {this.props.event.available_tickets.map((e,i) => 
                 <ListItem>
-                  Ticket type {i+1} - Available tickets: {this.props.event.available_tickets[i]} | Ticket price: {this.props.event.ticket_price[i]}
+                  Ticket type {i+1} - Available tickets: 
+                  {this.props.event.available_tickets[i]} | Ticket price: 
+                  {this.props.web3.utils.fromWei(this.props.event.ticket_price[i])} ETH
                 </ListItem>
               )}
             </List>
@@ -155,7 +157,7 @@ export class AddTickets extends Component {
 }
 
 export class ChangePrices extends Component {
-  state = {ticketType: 0, newPrice: this.props.prices[0]}
+  state = {ticketType: 0, newPrice: this.props.prices[0], button_state: false}
 
   render() {
     return(
@@ -178,23 +180,33 @@ export class ChangePrices extends Component {
             
             <TextField 
                 id={"new_price"}
-                label="New price"
+                label="New price (ETH)"
                 variant="outlined" 
                 margin="normal"
                 required={true}
                 type="number"
                 defaultValue={this.props.prices[this.state.ticketType]}
-                onChange={e => this.setState({newPrice: e.target.value})}
-                inputProps={{ min: "1", step: "1" }}/>
+                onChange={e => {
+                  !!e.target.value ? this.setState({newPrice: this.props.web3.utils.toWei(e.target.value)}) : 
+                    this.setState({newPrice: null});
+                  this.check_input(e.target.value);
+                }}
+                inputProps={{ min: "0.000001", step: "0.000001" }}/>
 
             <Button
               variant="contained"
               onClick={() => { this.submit() }}
+              disabled={this.state.button_state}
               >Change price</Button>
           </FormControl>
         </ExpansionPanelDetails>
       </ExpansionPanel>
     );
+  }
+
+  check_input(input) {
+    let s = (!input || input < 0.000001);
+    this.setState({button_state: s });
   }
 
   submit = async () => {

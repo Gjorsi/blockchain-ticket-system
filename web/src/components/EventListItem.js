@@ -86,8 +86,8 @@ export class BuyTicket extends Component {
           <FormControlLabel
             value={i}
             control={<Radio />}
-            label={"Type "+(i+1)+" - Price: "+this.props.event.ticket_price[i]+
-                    " wei | Available: "+this.props.event.available_tickets[i]}
+            label={"Type "+(i+1)+" - Price: "+this.props.web3.utils.fromWei(this.props.event.ticket_price[i])+
+                    " ETH | Available: "+this.props.event.available_tickets[i]}
           />
         </>
         )}

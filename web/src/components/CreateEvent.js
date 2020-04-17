@@ -120,7 +120,7 @@ export default class CreateEvent extends Component {
       this.setState(prevState => ({ price_table: [prevState.price_table, (
         <div key={i}><TextField 
           id={"tickets_avail" + i}
-          label="Total # of tickets"
+          label="Nr. of tickets"
           variant="outlined" 
           margin="normal"
           required={true}
@@ -130,13 +130,17 @@ export default class CreateEvent extends Component {
           helperText={"Ticket type " + (i+1)} />
         <TextField 
           id={"ticket_price" + i}
-          label="Ticket price"
+          label="Ticket price (ETH)"
           variant="outlined"
           margin="normal"
           required={true}
           type="number"
-          inputProps={{ min: "1", step: "1" }}
-          onChange={e => {this.ticket_prices[i] = e.target.value; this.check_form() }} /></div>
+          inputProps={{ min: "0.000001", step: "0.000001" }}
+          onChange={e => {
+            !!e.target.value ? this.ticket_prices[i] = this.props.web3.utils.toWei(e.target.value) : this.ticket_prices[i] = null; 
+            this.check_form();
+          }}
+          /></div>
       )]}))
     }
   }
@@ -170,6 +174,7 @@ export default class CreateEvent extends Component {
 
     for (let i=0; i<this.state.ticket_types; i++) {
       if (!this.tickets_avail[i] || !this.ticket_prices[i]) return true;
+      if (this.tickets_avail[i] < 1 || this.ticket_prices[i] < 1) return true; //avoid zero or negative ticket availability or prices
     }
 
     return false;

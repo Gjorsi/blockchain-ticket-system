@@ -31,7 +31,8 @@ export default class MyEvents extends Component {
             contract={this.props.contract}
             eventId={e} 
             event={this.props.events.get(e)}
-            reload_event={this.props.reload_event}/>
+            reload_event={this.props.reload_event}
+            web3={this.props.web3}/>
         )}
       </div>
     );
