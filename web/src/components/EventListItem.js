@@ -15,7 +15,8 @@ export default class EventListItem extends Component {
     return (
       <ExpansionPanel>
         <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography className="heading">
+          <Typography className="heading" 
+            color={(this.props.event.sale_active && Date.now() < this.props.event.deadline*1000) ? "primary" : "secondary"}>
             {bytesToString(this.props.event.title)}
           </Typography>
           <Typography className="secondaryHeading">
@@ -111,8 +112,8 @@ export class BuyTicket extends Component {
           label="Number of tickets"
           required={true}
           variant="outlined"
-          disabled={!this.props.event.sale_active}
-          helperText={!this.props.event.sale_active ? "Sale is closed for this event." : ""}
+          disabled={!this.props.event.sale_active || Date.now() >= this.props.event.deadline*1000}
+          helperText={(!this.props.event.sale_active || Date.now() >= this.props.event.deadline*1000) ? "Sale is closed for this event." : ""}
           inputProps={{min: "1", max:this.props.event.available_tickets[this.state.ticket_type], step: "1"}}
           defaultValue={1}
           onChange={this.handleChange}
@@ -121,7 +122,7 @@ export class BuyTicket extends Component {
         Total: {this.state.total}
         <Button
           variant="contained"
-          disabled={!this.state.button_state || !this.props.event.sale_active}
+          disabled={!this.state.button_state || !this.props.event.sale_active || Date.now() >= this.props.event.deadline*1000}
           onClick={this.buyTickets}
         > Buy tickets
         </Button>

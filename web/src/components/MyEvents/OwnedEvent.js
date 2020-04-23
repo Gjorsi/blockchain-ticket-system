@@ -36,6 +36,15 @@ export default class OwnedEvent extends Component {
               label="Buyback Status"
               color={this.get_color(this.props.event.buyback_active)}
               variant="outlined"/>
+            <TextField
+              label="Deadline"
+              margin="normal"
+              type="datetime-local"
+              disabled={true}
+              error={Date.now() >= this.props.event.deadline*1000}
+              value={new Date(this.props.event.deadline*1000).toISOString().substr(0,16)}
+            />
+
             <br/>
 
             <List dense={true}>
