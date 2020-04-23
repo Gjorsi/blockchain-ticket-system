@@ -20,6 +20,7 @@ export default class MyTickets extends Component {
             accounts={this.props.accounts} 
             contract={this.props.contract}
             eventId={e}
+            reload_event={this.props.reload_event}
             event={this.props.events.get(e)} />
         ):"No tickets found.."}
       </div>

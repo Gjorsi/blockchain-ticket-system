@@ -169,6 +169,7 @@ class App extends Component {
             <MyTickets 
               accounts={this.state.accounts} 
               contract={this.state.contract}
+              reload_event={this.reload_event}
               events={this.state.events}/>
         </TabPanel>
 

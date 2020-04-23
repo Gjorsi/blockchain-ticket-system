@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import {ExpansionPanel, ExpansionPanelSummary, Button, 
+import {TextField, ExpansionPanel, ExpansionPanelSummary, Button, 
 ExpansionPanelDetails, FormControl, List, ListItem } from '@material-ui/core';
 
 import { bytesToString } from '../../util/conversion.js';
@@ -28,6 +28,14 @@ export default class TicketView extends Component {
           <FormControl>
             
             {!!(this.state.tickets) ? this.list_tickets() : "loading.."}
+            <TextField
+              label="Deadline"
+              margin="normal"
+              type="datetime-local"
+              disabled={true}
+              error={Date.now() >= this.props.event.deadline*1000}
+              value={new Date(this.props.event.deadline*1000).toISOString().substr(0,16)}
+            />
             <Button
               color="secondary"
               variant="contained"
@@ -42,13 +50,15 @@ export default class TicketView extends Component {
 
   can_return_tickets() {
     return !!(this.state.tickets) ? 
-      (!this.props.event.buyback_active || !this.props.event.sale_active || (this.state.tickets.length < 1)) :
+      (!this.props.event.buyback_active 
+      || !this.props.event.sale_active 
+      || (this.state.tickets.length < 1)
+      || (Date.now() > this.props.event.deadline*1000)) :
       true;
   }
 
   return_tickets = async () => {
     let failed = true;
-    //await this.props.contract.methods.return_tickets(this.props.eventId).send({from: this.props.accounts[0]});
     await this.props.contract.methods.return_tickets(this.props.eventId).estimateGas({from: this.props.accounts[0]})
     .then(function(gasAmount){
       failed = false;
@@ -60,6 +70,7 @@ export default class TicketView extends Component {
     if (!failed) {
       await this.props.contract.methods.return_tickets(this.props.eventId).send({from: this.props.accounts[0]});
       this.load_tickets();
+      this.props.reload_event(this.props.eventId);
     }
 
   }
