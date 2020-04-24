@@ -64,7 +64,12 @@ export default class OwnedEvent extends Component {
               clickable
               onClick={() => this.view_funds()} /> <br/>
 
-
+            <div><Button
+              variant="contained"
+              color="primary"
+              disabled={(Date.now() < this.props.event.deadline*1000) || this.state.funds <= 0}
+              onClick={() => { this.withdraw_funds() }}
+              >Withdraw funds</Button></div><br/>
 
             <AddTickets
               {...this.props}
@@ -125,6 +130,21 @@ export default class OwnedEvent extends Component {
       }
     } else {
       this.setState({view_funds: false})
+    }
+  }
+
+  withdraw_funds = async () => {
+    try{
+      // attempt to withdraw funds
+      await this.props.contract.methods.withdraw_funds(this.props.eventId)
+        .send({from: this.props.accounts[0]});
+
+      //update current funds display
+      this.setState({funds: await this.props.contract.methods.view_funds(
+        this.props.eventId
+        ).call({from: this.props.accounts[0]})});
+    } catch (error) {
+      console.log("Dev error: " + error.message);
     }
   }
 
