@@ -9,7 +9,7 @@ export default class OwnedEvent extends Component {
 
   constructor() {
     super();
-    this.state = {customer_list: []}
+    this.state = {customer_list: [], view_funds: false, funds: 0}
   }
 
   render() {
@@ -58,6 +58,14 @@ export default class OwnedEvent extends Component {
             </List>
             <br/>
 
+            <Chip
+              label={"View funds: " + (this.state.view_funds? (this.props.web3.utils.fromWei(this.state.funds) + " ETH") : "...")}
+              variant="outlined"
+              clickable
+              onClick={() => this.view_funds()} /> <br/>
+
+
+
             <AddTickets
               {...this.props}
               tickets={this.props.event.available_tickets}/>
@@ -102,6 +110,21 @@ export default class OwnedEvent extends Component {
     
     } catch (error) {
       console.log("Dev error: " + error.message);
+    }
+  }
+
+  view_funds = async () => {
+    if (!this.state.view_funds) {
+      try{
+        this.setState({funds: await this.props.contract.methods.view_funds(
+          this.props.eventId
+          ).call({from: this.props.accounts[0]})});
+        this.setState({view_funds: true})
+      } catch (error) {
+        console.log("Dev error: " + error.message);
+      }
+    } else {
+      this.setState({view_funds: false})
     }
   }
 

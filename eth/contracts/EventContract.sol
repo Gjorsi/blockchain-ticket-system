@@ -95,6 +95,10 @@ contract EventContract {
     require(success, "Withdrawal transfer failed.");
   }
 
+  function view_funds(bytes32 event_id) external view eventExists(event_id) onlyHost(event_id) returns (uint128 current_funds){
+    return events[event_id].funds;
+  }
+
   function get_tickets(bytes32 event_id, address customer) external view eventExists(event_id)
         returns (uint64[] memory) {
     return events[event_id].tickets[customer].num_tickets;
@@ -135,7 +139,7 @@ contract EventContract {
     require(events[event_id].funds == 0, "Cannot delete event with positive funds.");
     require(events[event_id].deadline < (block.timestamp + 604800),
       "Cannot delete event before a week has passed since deadline"); //add a week past deadline (604800 seconds)
-      
+
     uint old_index = events[event_id].index;
     delete events[event_id];
     events[event_id_list[event_id_list.length - 1]].index = old_index;
