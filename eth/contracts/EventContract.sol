@@ -87,7 +87,6 @@ contract EventContract {
   }
 
   function withdraw_funds(bytes32 event_id) external eventExists(event_id) onlyHost(event_id) afterDeadline(event_id) {
-    require(events[event_id].exists, "Event with given ID not found.");
     events[event_id].buyback_active = false;
     uint128 withdraw_amount = events[event_id].funds;
     events[event_id].funds = 0;
@@ -133,6 +132,10 @@ contract EventContract {
   }
 
   function delete_event(bytes32 event_id) external eventExists(event_id) onlyHost(event_id) {
+    require(events[event_id].funds == 0, "Cannot delete event with positive funds.");
+    require(events[event_id].deadline < (block.timestamp + 604800),
+      "Cannot delete event before a week has passed since deadline"); //add a week past deadline (604800 seconds)
+      
     uint old_index = events[event_id].index;
     delete events[event_id];
     events[event_id_list[event_id_list.length - 1]].index = old_index;
