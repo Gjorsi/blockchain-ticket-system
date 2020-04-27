@@ -34,8 +34,7 @@ export default class TicketView extends Component {
               type="datetime-local"
               disabled={true}
               error={Date.now() >= this.props.event.deadline*1000}
-              value={new Date(this.props.event.deadline*1000).toISOString().substr(0,16)}
-            />
+              value={new Date(this.props.event.deadline*1000).toISOString().substr(0,16)}/>
             <Button
               color="secondary"
               variant="contained"

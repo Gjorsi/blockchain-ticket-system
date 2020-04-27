@@ -91,6 +91,13 @@ export class BuyTicket extends Component {
     return(
       <>
       <FormControl>
+        <TextField
+          label="Deadline"
+          margin="normal"
+          type="datetime-local"
+          disabled={true}
+          error={Date.now() >= this.props.event.deadline*1000}
+          value={new Date(this.props.event.deadline*1000).toISOString().substr(0,16)}/>
         <RadioGroup 
           value={this.state.ticket_type}
           name="ticket_type"
