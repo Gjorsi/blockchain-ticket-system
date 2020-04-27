@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { Backdrop } from '@material-ui/core';
 
 import OwnedEvent from './MyEvents/OwnedEvent.js';
 
@@ -32,6 +33,7 @@ export default class MyEvents extends Component {
             eventId={e} 
             event={this.props.events.get(e)}
             reload_event={this.props.reload_event}
+            load_event_list={this.props.load_event_list}
             web3={this.props.web3}/>
         )}
       </div>

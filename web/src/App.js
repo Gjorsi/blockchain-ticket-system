@@ -180,6 +180,7 @@ class App extends Component {
               event_list={this.state.event_list}
               events={this.state.events}
               reload_event={this.reload_event}
+              load_event_list={this.load_event_list}
               web3={this.state.web3}/>
         </TabPanel>
 

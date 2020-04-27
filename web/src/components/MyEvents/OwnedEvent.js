@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { TextField, ExpansionPanel, ExpansionPanelSummary, Button, Select, FormHelperText, 
-ExpansionPanelDetails, Chip, Avatar, FormControl, MenuItem, List, ListItem } from '@material-ui/core';
+ExpansionPanelDetails, Chip, Avatar, FormControl, MenuItem, List, ListItem, Popover } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 import { bytesToString } from '../../util/conversion.js';
@@ -9,7 +9,7 @@ export default class OwnedEvent extends Component {
 
   constructor() {
     super();
-    this.state = {customer_list: [], view_funds: false, funds: 0}
+    this.state = {customer_list: [], view_funds: false, funds: 0, delete_event_popup: false}
   }
 
   render() {
@@ -93,10 +93,27 @@ export default class OwnedEvent extends Component {
                 </ListItem>
               )}
             </List>
+
+            <div><Button
+              variant="contained"
+              color="secondary"
+              /*disabled={(Date.now() < (this.props.event.deadline/*+604800)*1000) || this.state.funds > 0}*/
+              onClick={() => this.delete_event()}
+              >Delete Event</Button></div>
+
           </FormControl>
         </ExpansionPanelDetails>
       </ExpansionPanel>
     );
+  }
+
+  delete_event = async () => {
+    try {
+      await this.props.contract.methods.delete_event(this.props.eventId).send({from: this.props.accounts[0]});
+      this.props.load_event_list()
+    } catch (error) {
+      console.log("Dev error: " + error.message);
+    }
   }
 
   get_color(activator) {
