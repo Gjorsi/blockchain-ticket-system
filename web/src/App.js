@@ -103,7 +103,8 @@ class App extends Component {
 
   new_event = async (event_id) => {
     await this.load_event_list();
-    this.reload_event(event_id);
+    await this.reload_event(event_id);
+    await this.setState({activeTab: 2});
   }
 
   load_events = async () => {
