@@ -195,3 +195,10 @@ contract('EventContract - Interaction tests', (accounts) => {
     util.revertToSnapshot(snapshotId);
   });
 });
+
+contract('', (acc) => {
+  // Dummy test to fix bug where snapshots are not properly rerverted in the last test to run
+  it('Dummy test', async () => {
+    util.advanceBlock();
+  });
+});
