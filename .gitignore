@@ -5,3 +5,5 @@ node_modules/
 web/src/contracts
 .vs
 *.log
+
+eth/gas_tests/*.csv

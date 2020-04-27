@@ -1,5 +1,5 @@
 const EventContract = artifacts.require("EventContract");
-const util = require('./Util');
+const util = require('../test/Util');
 
 contract('EventContract - Gas measurements', (accounts) => {
 
