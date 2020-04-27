@@ -110,7 +110,7 @@ export default class OwnedEvent extends Component {
   delete_event = async () => {
     try {
       await this.props.contract.methods.delete_event(this.props.eventId).send({from: this.props.accounts[0]});
-      this.props.load_event_list()
+      await this.props.delete_event(this.props.eventId)
     } catch (error) {
       console.log("Dev error: " + error.message);
     }

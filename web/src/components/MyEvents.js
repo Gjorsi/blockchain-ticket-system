@@ -33,7 +33,7 @@ export default class MyEvents extends Component {
             eventId={e} 
             event={this.props.events.get(e)}
             reload_event={this.props.reload_event}
-            load_event_list={this.props.load_event_list}
+            delete_event={this.props.delete_event}
             web3={this.props.web3}/>
         )}
       </div>

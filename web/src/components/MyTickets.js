@@ -14,15 +14,19 @@ export default class MyTickets extends Component {
   render() {
     return (
       <div>
-        {!!(this.state.participation)?this.state.participation.map((e, i) =>
-          <TicketView
-            key={i}
-            accounts={this.props.accounts} 
-            contract={this.props.contract}
-            eventId={e}
-            reload_event={this.props.reload_event}
-            event={this.props.events.get(e)} />
-        ):"No tickets found.."}
+        {!!(this.state.participation) ? this.state.participation.map((e, i) =>
+          {if (this.props.events.has(e)) {
+            return(<TicketView
+              key={i}
+              accounts={this.props.accounts} 
+              contract={this.props.contract}
+              eventId={e}
+              reload_event={this.props.reload_event}
+              event={this.props.events.get(e)} />)
+          } else return ("No tickets found.")} 
+
+        ):"Loading tickets from contract..."}
+          
       </div>
     );
   }

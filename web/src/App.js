@@ -122,6 +122,15 @@ class App extends Component {
     });
   }
 
+  delete_event = async (event_id) => {
+    await this.load_event_list();
+    this.setState((prevState) => {
+      let updatedEvents = new Map(prevState.events);
+      updatedEvents.delete(event_id);
+      return { events: updatedEvents};
+    });
+  }
+
   changeTab = (event, value) => {
     this.setState({ activeTab: value });
   }
@@ -180,7 +189,7 @@ class App extends Component {
               event_list={this.state.event_list}
               events={this.state.events}
               reload_event={this.reload_event}
-              load_event_list={this.load_event_list}
+              delete_event={this.delete_event}
               web3={this.state.web3}/>
         </TabPanel>
 
