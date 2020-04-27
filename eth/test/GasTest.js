@@ -1,4 +1,5 @@
 const EventContract = artifacts.require("EventContract");
+const util = require('./Util');
 
 contract('EventContract - Gas measurements', (accounts) => {
 
@@ -18,7 +19,7 @@ contract('EventContract - Gas measurements', (accounts) => {
     let title = web3.utils.asciiToHex("This is the event title");
 
     // Test event for later tests
-    let deadline = Math.round(new Date("2021-01-01").getTime() / 1000)
+    let deadline = Math.round((Date.now() + 1000*60*60*24)/ 1000) // One day in the future.
     let receipt = (await eventC.create_event(id, title, [1000], [ticket_price.toString()], false, 0, true, true, deadline, {from:owner})).receipt;
     test_event = { id: id, num_tickets: 1000, ticket_price: 1e16, per_customer_limit: false, max_per_customer: 0, owner: owner};
 
@@ -60,10 +61,24 @@ contract('EventContract - Gas measurements', (accounts) => {
       let total = receipts.map((r) => r.receipt.gasUsed).reduce((a,b) => a+b,0); // Sum gas
       return Math.round(total / accounts.length); // Calculate average
     });
+
+    await eventC.buy_tickets(test_event.id, 0, 1, {from: owner, value: ticket_price})
+
+    // Go to the future :)
+    snapshotId = await util.takeSnapshot();
+    await util.advanceTime(60*60*24*9);
+    await util.advanceBlock();
+
+    // Withdraw funds
+    action = await eventC.withdraw_funds(test_event.id, {from:owner});
     
     // Delete event
     action = await eventC.delete_event(test_event.id, {from: owner});
     gas['delete_event'] = action.receipt.gasUsed;
+
+    // Revert time travel
+    await util.revertToSnapshot(snapshotId);
+    await util.advanceBlock();
 
     Object.keys(gas).map((action) => {
       gas[action] = gas[action].toLocaleString('nb-NO');
