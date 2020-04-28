@@ -98,13 +98,12 @@ export default class CreateEvent extends Component {
           </MuiPickersUtilsProvider>
         </div>
 
-        <div>
-          <Button
-            id="createButton"
-            variant="contained"
-            disabled={this.state.button_disabled}
-            onClick={() => { this.submit() }}
-          >Create Event</Button></div>
+        <div><Button
+          id="createButton"
+          variant="contained"
+          disabled={this.state.button_disabled}
+          onClick={() => { this.submit() }}
+        >Create Event</Button></div>
         <Dialog
           open={this.state.confirmation_open}
           onClose={this.handle_close_confirmation}

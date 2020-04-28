@@ -25,7 +25,7 @@ export default class MyTickets extends Component {
               event={this.props.events.get(e)} />)
           } else return ("No tickets found.")} 
 
-        ):"Loading tickets from contract..."}
+        ):"No tickets found..."}
           
       </div>
     );

@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { TextField, ExpansionPanel, ExpansionPanelSummary, Button, Select, FormHelperText, 
-ExpansionPanelDetails, Chip, Avatar, FormControl, MenuItem, List, ListItem, Popover } from '@material-ui/core';
+ExpansionPanelDetails, Chip, Avatar, FormControl, MenuItem, List, ListItem, Popover,
+Dialog, DialogTitle, DialogContent, DialogActions} from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 import { bytesToString } from '../../util/conversion.js';
@@ -9,7 +10,14 @@ export default class OwnedEvent extends Component {
 
   constructor() {
     super();
-    this.state = {customer_list: [], view_funds: false, funds: 0, delete_event_popup: false}
+    this.state = {
+      customer_list: [], 
+      view_funds: false, 
+      funds: 0, 
+      confirmation_open: false,
+      confirmation_title: null, 
+      confirmation_message: null,
+      event_deleted: false}
   }
 
   render() {
@@ -18,7 +26,7 @@ export default class OwnedEvent extends Component {
     }
 
     return (
-      <ExpansionPanel>
+      <div><ExpansionPanel>
         <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
           {!!(this.props.event)?bytesToString(this.props.event.title):"loading.."}
         </ExpansionPanelSummary>
@@ -97,22 +105,57 @@ export default class OwnedEvent extends Component {
             <div><Button
               variant="contained"
               color="secondary"
-              /*disabled={(Date.now() < (this.props.event.deadline/*+604800)*1000) || this.state.funds > 0}*/
-              onClick={() => this.delete_event()}
+              disabled={(Date.now() < (this.props.event.deadline/*+604800*/)*1000) || this.state.funds > 0}
+              onClick={() => this.setState({
+                confirmation_title: "Delete Event", 
+                confirmation_open: true,
+                confirmation_message: "Deletion of event is irreversible - Confirm?"})}
               >Delete Event</Button></div>
 
           </FormControl>
         </ExpansionPanelDetails>
       </ExpansionPanel>
+
+      <Dialog
+        open={this.state.confirmation_open}
+        onClose={this.handle_close_confirmation}
+      >
+        <DialogTitle>{this.state.confirmation_title}</DialogTitle>
+        <DialogContent>
+          {this.state.confirmation_message}
+        </DialogContent>
+        <DialogActions>
+          <Button
+            color="secondary"
+            disabled={(Date.now() < (this.props.event.deadline/*+604800*/)*1000) || this.state.funds > 0 || this.state.event_deleted}
+            onClick={() => this.delete_event()}
+          >Delete Event</Button>
+          <Button onClick={this.handle_close_confirmation}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog></div>
     );
+  }
+
+  handle_close_confirmation = async () => {
+    await this.setState({confirmation_open: false});
+    if(this.state.event_deleted){
+      await this.props.delete_event(this.props.eventId);
+    }
   }
 
   delete_event = async () => {
     try {
       await this.props.contract.methods.delete_event(this.props.eventId).send({from: this.props.accounts[0]});
-      await this.props.delete_event(this.props.eventId)
+      await this.setState({
+        event_deleted: true,
+        confirmation_title: "Event deleted",
+        confirmation_message: "Event has been permanently deleted."});
     } catch (error) {
-      console.log("Dev error: " + error.message);
+      await this.setState({
+        confirmation_title: "Event deletion failed",
+        confirmation_message: "Event was not deleted - transaction failed."});
     }
   }
 
