@@ -7,6 +7,7 @@ import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 import { bytesToString } from '../util/conversion.js';
+import { getErrorMessage } from '../util/EthErrorMsg.js';
 import './EventList.css';
 
 export default class EventListItem extends Component {
@@ -69,7 +70,7 @@ export class BuyTicket extends Component {
     try{
       r = this.props.web3.utils.fromWei(val.toString()) + " ETH";
     } catch(e) {
-      r="invalid";
+      r = "invalid";
     }
     return r;
   }
@@ -82,7 +83,7 @@ export class BuyTicket extends Component {
       this.props.reload_event(this.props.eventId); //call to App.js to reload affected event
 
     } catch (error){
-      console.log(error.message);
+      console.log(getErrorMessage(error));
     }
   }
 

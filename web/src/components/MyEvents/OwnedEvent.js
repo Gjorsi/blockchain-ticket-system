@@ -5,6 +5,7 @@ Dialog, DialogTitle, DialogContent, DialogActions} from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 import { bytesToString } from '../../util/conversion.js';
+import { getErrorMessage } from '../../util/EthErrorMsg.js';
 
 export default class OwnedEvent extends Component {
 
@@ -155,7 +156,7 @@ export default class OwnedEvent extends Component {
     } catch (error) {
       await this.setState({
         confirmation_title: "Event deletion failed",
-        confirmation_message: "Event was not deleted - transaction failed."});
+        confirmation_message: "Event was not deleted - transaction failed. \n" + getErrorMessage(error)});
     }
   }
 

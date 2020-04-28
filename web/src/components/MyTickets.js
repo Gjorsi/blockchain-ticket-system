@@ -2,13 +2,20 @@ import React, { Component } from "react";
 
 import TicketView from './MyTickets/TicketView.js';
 
+import { getErrorMessage } from '../util/EthErrorMsg.js';
+
 export default class MyTickets extends Component {
 
   state = {participation: null}
 
   componentDidMount = async () => {
     // get events of which user owns tickets to
-    this.setState({participation: await this.props.contract.methods.get_participation().call({from: this.props.accounts[0]})});
+    try {
+      let participation = await this.props.contract.methods.get_participation().call({from: this.props.accounts[0]})
+      this.setState({participation: participation});
+    } catch (error) {
+      console.log(getErrorMessage(error));
+    }
   }
 
   render() {
