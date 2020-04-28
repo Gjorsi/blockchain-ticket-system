@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { Backdrop } from '@material-ui/core';
 
 import OwnedEvent from './MyEvents/OwnedEvent.js';
 

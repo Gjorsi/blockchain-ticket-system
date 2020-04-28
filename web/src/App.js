@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import EventContract from "./contracts/EventContract.json";
 import getWeb3 from "./getWeb3";
 import PropTypes from 'prop-types';
-import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import { Typography, AppBar, Tabs, Tab, Backdrop, CircularProgress, FormControl } from '@material-ui/core';
 
@@ -11,8 +10,6 @@ import CreateEvent from "./components/CreateEvent";
 import BrowseEvents from "./components/BrowseEvents";
 import MyTickets from "./components/MyTickets";
 import MyEvents from "./components/MyEvents";
-
-import { bytesToString } from './util/conversion.js';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { TextField, ExpansionPanel, ExpansionPanelSummary, Button, Select, FormHelperText, 
-ExpansionPanelDetails, Chip, Avatar, FormControl, MenuItem, List, ListItem, Popover,
+ExpansionPanelDetails, Chip, Avatar, FormControl, MenuItem, List, ListItem, 
 Dialog, DialogTitle, DialogContent, DialogActions} from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
@@ -96,8 +96,8 @@ export default class OwnedEvent extends Component {
               >Load customer list</Button></div>
 
             <List dense={true}>
-              {this.state.customer_list.map(e => 
-                <ListItem>
+              {this.state.customer_list.map((e, i) => 
+                <ListItem key={i}>
                   {e}
                 </ListItem>
               )}
