@@ -58,7 +58,7 @@ export default class OwnedEvent extends Component {
 
             <List dense={true}>
               {this.props.event.available_tickets.map((e,i) => 
-                <ListItem>
+                <ListItem key={i}>
                   Ticket type {i+1} - Available tickets: 
                   {this.props.event.available_tickets[i]} | Ticket price: 
                   {this.props.web3.utils.fromWei(this.props.event.ticket_price[i])} ETH
@@ -233,6 +233,7 @@ export class AddTickets extends Component {
           <FormControl>
             {this.props.tickets.map((e, i) => 
               <TextField 
+                key={i}
                 id={"tickets_to_add" + i}
                 label="Tickets to add"
                 variant="outlined" 
@@ -287,7 +288,7 @@ export class ChangePrices extends Component {
               onChange={e => this.setState({ticketType: e.target.value})}
             >
               {this.props.prices.map((e, i) => 
-                <MenuItem value={i}>{i+1}</MenuItem>
+                <MenuItem key={i} value={i}>{i+1}</MenuItem>
               )}
             </Select>
             

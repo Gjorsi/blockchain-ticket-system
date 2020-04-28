@@ -105,16 +105,17 @@ export class BuyTicket extends Component {
           onChange={this.handleChange}
         >
         {this.props.event.available_tickets.map((e, i) => 
-        <>
+
           <FormControlLabel
+            key={i}
             value={i}
             control={<Radio />}
             label={"Type "+(i+1)+" - Price: "+this.props.web3.utils.fromWei(this.props.event.ticket_price[i])+
                     " ETH | Available: "+this.props.event.available_tickets[i]}
           />
-        </>
+
         )}
-        <TextField
+        <br/><TextField
           type="number"
           name="num"
           label="Number of tickets"

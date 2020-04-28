@@ -80,7 +80,7 @@ export default class TicketView extends Component {
         <List dense={true}>
           {this.state.tickets.map((e, i) => 
             {if(e > 0){
-              return <ListItem>Tickets of type {i+1}: {e}</ListItem>
+              return <ListItem key={i}>Tickets of type {i+1}: {e}</ListItem>
             }}
           )}
         </List>
