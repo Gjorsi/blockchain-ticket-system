@@ -106,7 +106,7 @@ export default class OwnedEvent extends Component {
             <div><Button
               variant="contained"
               color="secondary"
-              disabled={(Date.now() < (this.props.event.deadline/*+604800*/)*1000) || this.state.funds > 0}
+              disabled={(Date.now() < (this.props.event.deadline+604800)*1000) || this.state.funds > 0}
               onClick={() => this.setState({
                 confirmation_title: "Delete Event", 
                 confirmation_open: true,

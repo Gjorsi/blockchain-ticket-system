@@ -140,7 +140,7 @@ contract EventContract {
 
   function delete_event(bytes32 event_id) external eventExists(event_id) onlyHost(event_id) {
     require(events[event_id].funds == 0, "Cannot delete event with positive funds.");
-    require(events[event_id].deadline < (block.timestamp + 604800),
+    require(events[event_id].deadline + 604800 < block.timestamp,
       "Cannot delete event before a week has passed since deadline"); //add a week past deadline (604800 seconds)
 
     uint old_index = events[event_id].index;
