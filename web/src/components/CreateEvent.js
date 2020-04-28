@@ -1,11 +1,26 @@
 import React, { Component } from "react";
-import { Switch, TextField, FormControlLabel, Button } from '@material-ui/core';
+import { Switch, TextField, FormControlLabel, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@material-ui/core';
 import DateFnsUtils from '@date-io/date-fns'
 import { MuiPickersUtilsProvider, KeyboardTimePicker, KeyboardDatePicker } from '@material-ui/pickers';
 
 export default class CreateEvent extends Component {
-  state = {event_ID: null, event_title: null, sale_active: false, buyback_active: false, customer_limited: false, 
-        tickets_per_customer: 1, ticket_types: 1, price_table: [], deadline: null, button_disabled: true, event_ID_helperText: ""};
+  state = {
+    event_ID: null, 
+    event_title: null, 
+    sale_active: false, 
+    buyback_active: false, 
+    customer_limited: false, 
+    tickets_per_customer: 1, 
+    ticket_types: 1, 
+    price_table: [], 
+    deadline: null, 
+    button_disabled: true, 
+    event_ID_helperText: "",
+    confirmation_open: false,
+    confirmation_title: null,
+    confirmation_message: null,
+    event_created: false,
+  };
 
   componentDidMount() {
     this.set_ticket_types(1);
@@ -83,12 +98,27 @@ export default class CreateEvent extends Component {
           </MuiPickersUtilsProvider>
         </div>
 
-        <div><Button
-          id="createButton"
-          variant="contained"
-          disabled={this.state.button_disabled}
-          onClick={() => { this.submit() }}
+        <div>
+          <Button
+            id="createButton"
+            variant="contained"
+            disabled={this.state.button_disabled}
+            onClick={() => { this.submit() }}
           >Create Event</Button></div>
+        <Dialog
+          open={this.state.confirmation_open}
+          onClose={this.handle_close_confirmation}
+        >
+          <DialogTitle>{this.state.confirmation_title}</DialogTitle>
+          <DialogContent>
+            {this.state.confirmation_message}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={this.handle_close_confirmation}>
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
     );
   }
@@ -115,6 +145,36 @@ export default class CreateEvent extends Component {
     this.tickets_avail = new Array(val);
     this.ticket_prices = new Array(val);
     this.check_form();
+  }
+
+  open_confirmation = async (errorMessage) => {
+    if(this.state.event_created) {
+      await this.setState(
+        {
+          confirmation_title: "Event successfully created!", 
+          confirmation_message: "Your event with id " + this.state.event_ID + " has been created.",
+          confirmation_open: true,
+        }
+      );
+    } else {
+      await this.setState(
+        {
+          confirmation_title: "Error when creating event", 
+          confirmation_message: "There was an error when trying to create event: " + errorMessage,
+          confirmation_open: true,
+        }
+      );
+    }
+  }
+
+  handle_close_confirmation = async () => {
+    await this.setState({confirmation_open: false});
+    if(this.state.event_created){
+      this.props.new_event_update(
+        this.props.web3.utils.padRight(
+          this.props.web3.utils.asciiToHex(this.state.event_ID), 
+          64)); //call App.js to update event list and load the event into cache
+    }
   }
 
   tickets_and_prices() {
@@ -206,13 +266,12 @@ export default class CreateEvent extends Component {
         this.state.buyback_active,
         Math.round(this.state.deadline.getTime() / 1000)
         ).send({from: this.props.accounts[0]});
-      this.props.new_event_update(
-        this.props.web3.utils.padRight(
-          this.props.web3.utils.asciiToHex(
-            this.state.event_ID), 
-            64)); //call App.js to update event list and load the event into cache
+      await this.setState({event_created: true});
+      await this.open_confirmation(null);
     } catch (error) {
-      console.log("Dev error: " + error);
+      console.log("Dev error: ");
+      console.log(error);
+      await this.open_confirmation(error.message);
     }
   }
 }

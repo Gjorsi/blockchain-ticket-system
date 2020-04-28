@@ -13,7 +13,7 @@ contract EventContract {
     bytes32 title;
     uint index;
     uint64 max_per_customer;
-    uint128 funds;
+    uint256 funds;
     bool exists;
     bool sale_active;
     bool buyback_active;
@@ -33,6 +33,8 @@ contract EventContract {
     uint128 total_paid;
     uint64[] num_tickets;
   }
+
+  event EventCreated(bytes32 event_id);
 
   modifier eventExists(bytes32 event_id){
     require(events[event_id].exists, "Event with given ID not found.");
@@ -84,18 +86,19 @@ contract EventContract {
       events[_event_id].deadline = _deadline;
       events[_event_id].index = event_id_list.length;
       event_id_list.push(_event_id);
+      emit EventCreated(_event_id);
   }
 
   function withdraw_funds(bytes32 event_id) external eventExists(event_id) onlyHost(event_id) afterDeadline(event_id) {
     events[event_id].buyback_active = false;
-    uint128 withdraw_amount = events[event_id].funds;
+    uint256 withdraw_amount = events[event_id].funds;
     events[event_id].funds = 0;
 
     (bool success, ) = events[event_id].owner.call.value(withdraw_amount)("");
     require(success, "Withdrawal transfer failed.");
   }
 
-  function view_funds(bytes32 event_id) external view eventExists(event_id) onlyHost(event_id) returns (uint128 current_funds){
+  function view_funds(bytes32 event_id) external view eventExists(event_id) onlyHost(event_id) returns (uint256 current_funds){
     return events[event_id].funds;
   }
 
@@ -204,6 +207,8 @@ contract EventContract {
 
     delete_customer(event_id, msg.sender);
     delete_participation(event_id, msg.sender);
+
+    events[event_id].funds -= return_amount;
 
     (bool success, ) = msg.sender.call.value(return_amount)("");
     require(success, "Return transfer to customer failed.");

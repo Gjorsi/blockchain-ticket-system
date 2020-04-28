@@ -1,4 +1,5 @@
 const EventContract = artifacts.require("EventContract");
+const util = require('./Util');
 
 
 contract('EventContract - Interaction tests', (accounts) => {
@@ -173,11 +174,16 @@ contract('EventContract - Interaction tests', (accounts) => {
   });
 
   it('Delete event', async () => {
+    // Create snapshot since we're messing with EVM time
+    const snapshotId = util.takeSnapshot();
+
     let id = web3.utils.asciiToHex("TestEvent3");
     let title = web3.utils.asciiToHex("This event will be deleted soon");
-    let deadline = Math.round(new Date("2021-01-01").getTime() / 1000)
+    let deadline = Math.round((Date.now() + 1000*60*60*24)/ 1000) // One day in the future.
     await eventC.create_event(id, title, [10000], [1e17.toString()], false, 0, true, true, deadline, {from:accounts[6]});
 
+    // Fake time to be one week and two days in the future, so we are one week past the deadline
+    util.advanceTime(60*60*24*9);
     await eventC.delete_event(id, {from:accounts[6]});
     try {
       await eventC.get_event_info(id);
@@ -185,5 +191,14 @@ contract('EventContract - Interaction tests', (accounts) => {
     } catch (error) {
       // Good
     }
+    // Revert
+    util.revertToSnapshot(snapshotId);
+  });
+});
+
+contract('', (acc) => {
+  // Dummy test to fix bug where snapshots are not properly rerverted in the last test to run
+  it('Dummy test', async () => {
+    util.advanceBlock();
   });
 });

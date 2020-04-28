@@ -4,7 +4,7 @@ import getWeb3 from "./getWeb3";
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
-import { Button, Typography, AppBar, Tabs, Tab, Backdrop, CircularProgress, FormControl } from '@material-ui/core';
+import { Typography, AppBar, Tabs, Tab, Backdrop, CircularProgress, FormControl } from '@material-ui/core';
 
 import "./App.css";
 import CreateEvent from "./components/CreateEvent";
@@ -87,6 +87,14 @@ class App extends Component {
       // cache all events
       await this.load_events();
 
+      // Listen for the EventCreated event to be emitted from the contract
+      instance.events.EventCreated(async (err, res) => {
+        if(!err){
+          await this.reload_event(res.returnValues.event_id);
+          await this.load_event_list();
+        }
+      });
+
     } catch (error) {
       // Catch any errors for any of the above operations.
       alert(
@@ -102,8 +110,7 @@ class App extends Component {
   }
 
   new_event = async (event_id) => {
-    await this.load_event_list();
-    this.reload_event(event_id);
+    await this.setState({activeTab: 2});
   }
 
   load_events = async () => {
@@ -145,11 +152,6 @@ class App extends Component {
  
       <div className="App">
         <AppBar position="static">
-            <Button
-              id="reload_events"
-              variant="contained"
-              onClick={() => { this.load_events() }}
-              >Reload events</Button>
             <Tabs
                 value={this.state.activeTab}
                 indicatorColor="primary"
