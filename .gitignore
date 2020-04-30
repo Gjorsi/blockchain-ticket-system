@@ -5,3 +5,4 @@ node_modules/
 web/src/contracts
 .vs
 *.log
+.env
