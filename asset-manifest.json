@@ -1,0 +1,21 @@
+{
+  "files": {
+    "main.css": "/blockchain-ticket-system/static/css/main.c85d6192.chunk.css",
+    "main.js": "/blockchain-ticket-system/static/js/main.2b9d62f5.chunk.js",
+    "main.js.map": "/blockchain-ticket-system/static/js/main.2b9d62f5.chunk.js.map",
+    "runtime-main.js": "/blockchain-ticket-system/static/js/runtime-main.fe86a376.js",
+    "runtime-main.js.map": "/blockchain-ticket-system/static/js/runtime-main.fe86a376.js.map",
+    "static/js/2.6b47e039.chunk.js": "/blockchain-ticket-system/static/js/2.6b47e039.chunk.js",
+    "static/js/2.6b47e039.chunk.js.map": "/blockchain-ticket-system/static/js/2.6b47e039.chunk.js.map",
+    "index.html": "/blockchain-ticket-system/index.html",
+    "precache-manifest.c472107f2b12e99817ee653d8ea0df1b.js": "/blockchain-ticket-system/precache-manifest.c472107f2b12e99817ee653d8ea0df1b.js",
+    "service-worker.js": "/blockchain-ticket-system/service-worker.js",
+    "static/css/main.c85d6192.chunk.css.map": "/blockchain-ticket-system/static/css/main.c85d6192.chunk.css.map"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.fe86a376.js",
+    "static/js/2.6b47e039.chunk.js",
+    "static/css/main.c85d6192.chunk.css",
+    "static/js/main.2b9d62f5.chunk.js"
+  ]
+}
