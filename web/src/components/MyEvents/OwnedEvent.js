@@ -148,7 +148,15 @@ export default class OwnedEvent extends Component {
 
   delete_event = async () => {
     try {
-      await this.props.contract.methods.delete_event(this.props.eventId).send({from: this.props.accounts[0]});
+      await this.props.contract.methods.delete_event(this.props.eventId).send({from: this.props.accounts[0]})
+        .on('transactionHash', (tx) => {
+          this.props.add_pending_tx(tx);
+        })
+        .on('confirmation', (num, receipt) => {
+          if(num == 0){
+            this.props.confirm(receipt.transactionHash);
+          }
+        });
       await this.setState({
         event_deleted: true,
         confirmation_title: "Event deleted",
@@ -168,9 +176,25 @@ export default class OwnedEvent extends Component {
   handleActivateSale = async (activator) => {
     try {
       if (activator) {
-        await this.props.contract.methods.stop_sale(this.props.eventId).send({from: this.props.accounts[0]});
+        await this.props.contract.methods.stop_sale(this.props.eventId).send({from: this.props.accounts[0]})
+        .on('transactionHash', (tx) => {
+          this.props.add_pending_tx(tx);
+        })
+        .on('confirmation', (num, receipt) => {
+          if(num == 0){
+            this.props.confirm(receipt.transactionHash);
+          }
+        });
       } else {
-        await this.props.contract.methods.continue_sale(this.props.eventId).send({from: this.props.accounts[0]});
+        await this.props.contract.methods.continue_sale(this.props.eventId).send({from: this.props.accounts[0]})
+        .on('transactionHash', (tx) => {
+          this.props.add_pending_tx(tx);
+        })
+        .on('confirmation', (num, receipt) => {
+          if(num == 0){
+            this.props.confirm(receipt.transactionHash);
+          }
+        });
       }
       this.props.reload_event(this.props.eventId); //call to App.js to reload affected event
     
@@ -198,7 +222,15 @@ export default class OwnedEvent extends Component {
     try{
       // attempt to withdraw funds
       await this.props.contract.methods.withdraw_funds(this.props.eventId)
-        .send({from: this.props.accounts[0]});
+        .send({from: this.props.accounts[0]})
+        .on('transactionHash', (tx) => {
+          this.props.add_pending_tx(tx);
+        })
+        .on('confirmation', (num, receipt) => {
+          if(num == 0){
+            this.props.confirm(receipt.transactionHash);
+          }
+        });
 
       //update current funds display
       this.setState({funds: await this.props.contract.methods.view_funds(
@@ -261,7 +293,15 @@ export class AddTickets extends Component {
       await this.props.contract.methods.add_tickets(
         this.props.eventId,
         this.addTickets
-        ).send({from: this.props.accounts[0]});
+        ).send({from: this.props.accounts[0]})
+        .on('transactionHash', (tx) => {
+          this.props.add_pending_tx(tx);
+        })
+        .on('confirmation', (num, receipt) => {
+          if(num == 0){
+            this.props.confirm(receipt.transactionHash);
+          }
+        });
       this.props.reload_event(this.props.eventId); //call to App.js to reload affected event
 
     } catch (error) {
@@ -329,7 +369,15 @@ export class ChangePrices extends Component {
         this.props.eventId,
         this.state.ticketType,
         this.state.newPrice
-        ).send({from: this.props.accounts[0]});
+        ).send({from: this.props.accounts[0]})
+        .on('transactionHash', (tx) => {
+          this.props.add_pending_tx(tx);
+        })
+        .on('confirmation', (num, receipt) => {
+          if(num == 0){
+            this.props.confirm(receipt.transactionHash);
+          }
+        });
       this.props.reload_event(this.props.eventId); //call to App.js to reload affected event
 
     } catch (error) {

@@ -79,7 +79,15 @@ export class BuyTicket extends Component {
     try {
       let total_value = this.props.event.ticket_price[this.state.ticket_type]*this.state.num;
       await this.props.contract.methods.buy_tickets(this.props.eventId, this.state.ticket_type, this.state.num)
-        .send({from: this.props.accounts[0], value: total_value});
+        .send({from: this.props.accounts[0], value: total_value})
+        .on('transactionHash', (tx) => {
+          this.props.add_pending_tx(tx);
+        })
+        .on('confirmation', (num, receipt) => {
+          if(num == 0){
+            this.props.confirm(receipt.transactionHash);
+          }
+        });
       this.props.reload_event(this.props.eventId); //call to App.js to reload affected event
 
     } catch (error){

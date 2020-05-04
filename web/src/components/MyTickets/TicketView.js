@@ -67,7 +67,15 @@ export default class TicketView extends Component {
     });
 
     if (!failed) {
-      await this.props.contract.methods.return_tickets(this.props.eventId).send({from: this.props.accounts[0]});
+      await this.props.contract.methods.return_tickets(this.props.eventId).send({from: this.props.accounts[0]})
+        .on('transactionHash', (tx) => {
+          this.props.add_pending_tx(tx);
+        })
+        .on('confirmation', (num, receipt) => {
+          if(num == 0){
+            this.props.confirm(receipt.transactionHash);
+          }
+        });
       this.load_tickets();
       this.props.reload_event(this.props.eventId);
     }

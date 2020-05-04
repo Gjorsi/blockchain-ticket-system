@@ -16,10 +16,9 @@ export default class CreateEvent extends Component {
     deadline: null, 
     button_disabled: true, 
     event_ID_helperText: "",
-    confirmation_open: false,
-    confirmation_title: null,
-    confirmation_message: null,
-    event_created: false,
+    error_open: false,
+    error_title: null,
+    error_message: null,
   };
 
   componentDidMount() {
@@ -105,15 +104,15 @@ export default class CreateEvent extends Component {
           onClick={() => { this.submit() }}
         >Create Event</Button></div>
         <Dialog
-          open={this.state.confirmation_open}
-          onClose={this.handle_close_confirmation}
+          open={this.state.error_open}
+          onClose={this.handle_close_error}
         >
-          <DialogTitle>{this.state.confirmation_title}</DialogTitle>
+          <DialogTitle>{this.state.error_title}</DialogTitle>
           <DialogContent>
-            {this.state.confirmation_message}
+            {this.state.error_message}
           </DialogContent>
           <DialogActions>
-            <Button onClick={this.handle_close_confirmation}>
+            <Button onClick={this.handle_close_error}>
               Close
             </Button>
           </DialogActions>
@@ -146,34 +145,18 @@ export default class CreateEvent extends Component {
     this.check_form();
   }
 
-  open_confirmation = async (errorMessage) => {
-    if(this.state.event_created) {
-      await this.setState(
-        {
-          confirmation_title: "Event successfully created!", 
-          confirmation_message: "Your event with id " + this.state.event_ID + " has been created.",
-          confirmation_open: true,
-        }
-      );
-    } else {
-      await this.setState(
-        {
-          confirmation_title: "Error when creating event", 
-          confirmation_message: "There was an error when trying to create event: " + errorMessage,
-          confirmation_open: true,
-        }
-      );
-    }
+  open_error = async (errorMessage) => {
+    await this.setState(
+      {
+        error_title: "Error when creating event", 
+        error_message: "There was an error when trying to create event: " + errorMessage,
+        error_open: true,
+      }
+    );
   }
 
-  handle_close_confirmation = async () => {
-    await this.setState({confirmation_open: false});
-    if(this.state.event_created){
-      this.props.new_event_update(
-        this.props.web3.utils.padRight(
-          this.props.web3.utils.asciiToHex(this.state.event_ID), 
-          64)); //call App.js to update event list and load the event into cache
-    }
+  handle_close_error = async () => {
+    await this.setState({error_open: false});
   }
 
   tickets_and_prices() {
@@ -264,13 +247,19 @@ export default class CreateEvent extends Component {
         this.state.sale_active,
         this.state.buyback_active,
         Math.round(this.state.deadline.getTime() / 1000)
-        ).send({from: this.props.accounts[0]});
-      await this.setState({event_created: true});
-      await this.open_confirmation(null);
+        ).send({from: this.props.accounts[0]})
+        .on('transactionHash', (tx) => {
+          this.props.add_pending_tx(tx);
+        })
+        .on('confirmation', (num, receipt) => {
+          if(num == 0){
+            this.props.confirm(receipt.transactionHash);
+          }
+        });
     } catch (error) {
       console.log("Dev error: ");
       console.log(error);
-      await this.open_confirmation(error.message);
+      await this.open_error(error.message);
     }
   }
 }

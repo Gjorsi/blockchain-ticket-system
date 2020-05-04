@@ -3,13 +3,28 @@ import EventContract from "./contracts/EventContract.json";
 import getWeb3 from "./getWeb3";
 import PropTypes from 'prop-types';
 import Box from '@material-ui/core/Box';
-import { Typography, AppBar, Tabs, Tab, Backdrop, CircularProgress, FormControl } from '@material-ui/core';
+import styled from 'styled-components';
+import { green, orange } from '@material-ui/core/colors';
+import { Button, Typography, AppBar, Tabs, Tab, Backdrop, CircularProgress, FormControl } from '@material-ui/core';
 
 import "./App.css";
 import CreateEvent from "./components/CreateEvent";
 import BrowseEvents from "./components/BrowseEvents";
 import MyTickets from "./components/MyTickets";
 import MyEvents from "./components/MyEvents";
+
+const PendingButton = styled(Button)`
+  && {
+    text-transform: none;
+    background-color: ${orange[200]};
+  }
+`;
+
+const ConfirmedButton = styled(Button)`
+  text-transform: none;
+  background-color: ${green[200]};
+`;
+
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -55,7 +70,7 @@ function SimpleBackdrop() {
 }
 
 class App extends Component {
-  state = { web3: null, accounts: null, contract: null, activeTab: 3 };
+  state = { web3: null, accounts: null, contract: null, activeTab: 3, pending: [], confirmed: [] };
 
   componentDidMount = async () => {
     try {
@@ -106,10 +121,6 @@ class App extends Component {
     this.setState({event_list: event_list});
   }
 
-  new_event = async (event_id) => {
-    await this.setState({activeTab: 2});
-  }
-
   load_events = async () => {
     let events = new Map();
     await Promise.all(this.state.event_list.map(async (event) => {
@@ -139,6 +150,17 @@ class App extends Component {
     this.setState({ activeTab: value });
   }
 
+  confirm = async (tx) => {
+    let pending = this.state.pending;
+    pending.splice(pending.indexOf(tx), 1);
+    this.setState({ pending: pending });
+    this.setState({ confirmed: [...this.state.confirmed, tx] });
+  }
+
+  add_pending_tx = async (id) => {
+    this.setState({ pending: [...this.state.pending, (id)] });
+  }
+
   render() {
 
     if (!this.state.web3 || !this.state.events) {
@@ -149,19 +171,40 @@ class App extends Component {
  
       <div className="App">
         <AppBar position="static">
-            <Tabs
-                value={this.state.activeTab}
-                indicatorColor="primary"
-                textColor="primary"
-                centered={true}
-                onChange={this.changeTab}
-                aria-label="simple tabs example"
-            >
-                <Tab label="Browse events" {...tabProps(0)} />
-                <Tab label="My tickets" {...tabProps(1)} />
-                <Tab label="My events" {...tabProps(2)} />
-                <Tab label="Create event" {...tabProps(3)} />
-            </Tabs>
+          {this.state.pending.map((tx) => {
+            let short = tx.substring(0,15) + '...';
+            return (
+              <PendingButton 
+                variant="contained"
+              >Transaction with id {short} is pending</PendingButton>
+            );
+          })}
+          {this.state.confirmed.map((tx) => {
+            let short = tx.substring(0,15) + '...';
+            return (
+              <ConfirmedButton 
+                variant="contained"
+                onClick={() => {
+                  let conf = this.state.confirmed;
+                  conf.splice(conf.indexOf(tx), 1);
+                  this.setState({ confirmed: conf });
+                }}
+              >Transaction with id {short} has been confirmed! Click to dismiss.</ConfirmedButton>
+            );
+          })}
+          <Tabs
+            value={this.state.activeTab}
+            indicatorColor="primary"
+            textColor="primary"
+            centered={true}
+            onChange={this.changeTab}
+            aria-label="simple tabs example"
+          >
+            <Tab label="Browse events" {...tabProps(0)} />
+            <Tab label="My tickets" {...tabProps(1)} />
+            <Tab label="My events" {...tabProps(2)} />
+            <Tab label="Create event" {...tabProps(3)} />
+          </Tabs>
         </AppBar>
         <TabPanel value={this.state.activeTab} index={0}>
           <BrowseEvents 
@@ -170,6 +213,8 @@ class App extends Component {
             event_list={this.state.event_list}
             events={this.state.events}
             reload_event={this.reload_event}
+            confirm={this.confirm}
+            add_pending_tx={this.add_pending_tx}
             web3={this.state.web3}/>
         </TabPanel>
 
@@ -178,6 +223,8 @@ class App extends Component {
               accounts={this.state.accounts} 
               contract={this.state.contract}
               reload_event={this.reload_event}
+              confirm={this.confirm}
+              add_pending_tx={this.add_pending_tx}
               events={this.state.events}/>
         </TabPanel>
 
@@ -189,6 +236,8 @@ class App extends Component {
               events={this.state.events}
               reload_event={this.reload_event}
               delete_event={this.delete_event}
+              confirm={this.confirm}
+              add_pending_tx={this.add_pending_tx}
               web3={this.state.web3}/>
         </TabPanel>
 
@@ -198,7 +247,8 @@ class App extends Component {
               web3={this.state.web3} 
               accounts={this.state.accounts} 
               contract={this.state.contract}
-              new_event_update={this.new_event}/>
+              confirm={this.confirm}
+              add_pending_tx={this.add_pending_tx}/>
         </TabPanel>
 
       </div>

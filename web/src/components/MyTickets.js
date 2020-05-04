@@ -29,6 +29,8 @@ export default class MyTickets extends Component {
               contract={this.props.contract}
               eventId={e}
               reload_event={this.props.reload_event}
+              add_pending_tx={this.props.add_pending_tx}
+              confirm={this.props.confirm}
               event={this.props.events.get(e)} />)
           } else return ("No tickets found.")} 
 
