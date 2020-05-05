@@ -6,12 +6,68 @@ import Box from '@material-ui/core/Box';
 import styled from 'styled-components';
 import { green, orange } from '@material-ui/core/colors';
 import { Button, Typography, AppBar, Tabs, Tab, Backdrop, CircularProgress, FormControl } from '@material-ui/core';
+import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 
 import "./App.css";
 import CreateEvent from "./components/CreateEvent";
 import BrowseEvents from "./components/BrowseEvents";
 import MyTickets from "./components/MyTickets";
 import MyEvents from "./components/MyEvents";
+
+const colors = {white: "#ffffff", black: "#000000", teal: "#2fc4b5", grey: "#7a7a7a", light_grey: "#b5b5b5", 
+  dark_grey: "#363636", orange: "#e85623"};
+
+const theme = createMuiTheme({
+  palette: {
+    primary: {
+      main: colors.white,
+      contrastText: colors.black,
+    },
+    secondary: {
+      main: colors.teal,
+    },
+    error: {
+      main: colors.orange,
+
+    },
+    text: {
+      primary: colors.white,
+      secondary: colors.light_grey,
+      disabled: colors.light_grey,
+    },
+    action: {
+      disabled: colors.light_grey,
+    }
+  },
+
+  overrides: {
+    MuiExpansionPanelSummary: {
+      root: {
+        backgroundColor: colors.dark_grey,
+      },
+    },
+
+    MuiExpansionPanelDetails: {
+      root: {
+        backgroundColor: colors.dark_grey,
+      },
+    },
+
+    MuiFormControlLabel: {
+      label: {
+        color: colors.light_grey,
+      },
+    },
+
+    MuiOutlinedInput: {
+      root: {
+        '& $notchedOutline': {
+          borderColor: colors.grey,
+        },
+      }
+    }
+  }
+});
 
 const PendingButton = styled(Button)`
   && {
@@ -174,7 +230,7 @@ class App extends Component {
     }
 
     return (
- 
+      <ThemeProvider theme={theme}>
       <div className="App">
         <AppBar position="static">
           {this.state.pending.map((tx) => {
@@ -200,6 +256,7 @@ class App extends Component {
           })}
           <Tabs
             value={this.state.activeTab}
+            className="Tabs"
             indicatorColor="secondary"
             centered={true}
             onChange={this.changeTab}
@@ -253,10 +310,12 @@ class App extends Component {
               accounts={this.state.accounts} 
               contract={this.state.contract}
               confirm={this.confirm}
-              add_pending_tx={this.add_pending_tx}/>
+              add_pending_tx={this.add_pending_tx}
+              colors={this.colors}/>
         </TabPanel>
 
       </div>
+      </ThemeProvider>
     );
   }
 }

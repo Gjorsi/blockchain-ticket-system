@@ -8,16 +8,16 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 import { bytesToString } from '../util/conversion.js';
 import { getErrorMessage } from '../util/EthErrorMsg.js';
-import './EventList.css';
+import './ExpansionPanel.css';
 
 export default class EventListItem extends Component {
 
   render() {
     return (
       <ExpansionPanel>
-        <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+        <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} >
           <Typography className="heading" 
-            color={(this.props.event.sale_active && Date.now() < this.props.event.deadline*1000) ? "primary" : "secondary"}>
+            color={(this.props.event.sale_active && Date.now() < this.props.event.deadline*1000) ? "primary" : "error"}>
             {bytesToString(this.props.event.title)}
           </Typography>
           <Typography className="secondaryHeading">
@@ -139,6 +139,7 @@ export class BuyTicket extends Component {
         Total: {this.state.total}
         <Button
           variant="contained"
+          color="secondary"
           disabled={!this.state.button_state || !this.props.event.sale_active || Date.now() >= this.props.event.deadline*1000}
           onClick={this.buyTickets}
         > Buy tickets

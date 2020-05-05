@@ -32,10 +32,10 @@ export default class CreateEvent extends Component {
   render() {
     return (
       <div>
-        <h2>Create a new event</h2>
 
         <TextField 
           id="event_ID" 
+          color="secondary"
           label="Unique event ID" 
           helperText={this.state.event_ID_helperText}
           variant="outlined" 
@@ -44,6 +44,7 @@ export default class CreateEvent extends Component {
 
         <TextField 
           id="event_title" 
+          color="secondary"
           label="Event title" 
           variant="outlined" 
           required={true}
@@ -65,6 +66,7 @@ export default class CreateEvent extends Component {
 
         <div><TextField 
           id="ticket_types" 
+          color="secondary"
           label="# of ticket types" 
           variant="outlined" 
           margin="normal"
@@ -80,6 +82,7 @@ export default class CreateEvent extends Component {
           <MuiPickersUtilsProvider utils={DateFnsUtils}>
             <KeyboardDatePicker
               id="deadline"
+              color="secondary"
               variant="inline"
               format="yyyy-MM-dd"
               margin="normal"
@@ -90,6 +93,7 @@ export default class CreateEvent extends Component {
 	    <KeyboardTimePicker
               margin="normal"
               id="time-picker"
+              color="secondary"
               label="Choose a deadline time"
               value={this.state.deadline}
               onChange={d => this.update_deadline(d)}
@@ -99,6 +103,7 @@ export default class CreateEvent extends Component {
 
         <div><Button
           id="createButton"
+          color="secondary"
           variant="contained"
           disabled={this.state.button_disabled}
           onClick={() => { this.submit() }}
@@ -125,6 +130,7 @@ export default class CreateEvent extends Component {
     if (this.state.customer_limited) return (
       <div><TextField 
         id="tickets_per_customer" 
+        color="secondary"
         label="Max. tickets / customer" 
         variant="outlined" 
         margin="normal"
@@ -165,6 +171,7 @@ export default class CreateEvent extends Component {
       this.setState(prevState => ({ price_table: [prevState.price_table, (
         <div key={i}><TextField 
           id={"tickets_avail" + i}
+          color="secondary"
           label="Nr. of tickets"
           variant="outlined" 
           margin="normal"
@@ -175,6 +182,7 @@ export default class CreateEvent extends Component {
           helperText={"Ticket type " + (i+1)} />
         <TextField 
           id={"ticket_price" + i}
+          color="secondary"
           label="Ticket price (ETH)"
           variant="outlined"
           margin="normal"

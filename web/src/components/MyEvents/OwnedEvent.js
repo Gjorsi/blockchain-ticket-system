@@ -3,9 +3,11 @@ import { TextField, ExpansionPanel, ExpansionPanelSummary, Button, Select, FormH
 ExpansionPanelDetails, Chip, Avatar, FormControl, MenuItem, List, ListItem, 
 Dialog, DialogTitle, DialogContent, DialogActions} from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { makeStyles } from "@material-ui/styles";
 
 import { bytesToString } from '../../util/conversion.js';
 import { getErrorMessage } from '../../util/EthErrorMsg.js';
+import '../ExpansionPanel.css';
 
 export default class OwnedEvent extends Component {
 
@@ -70,12 +72,13 @@ export default class OwnedEvent extends Component {
             <Chip
               label={"View funds: " + (this.state.view_funds? (this.props.web3.utils.fromWei(this.state.funds) + " ETH") : "...")}
               variant="outlined"
+              color="primary"
               clickable
               onClick={() => this.view_funds()} /> <br/>
 
             <div><Button
               variant="contained"
-              color="primary"
+              color="secondary"
               disabled={(Date.now() < this.props.event.deadline*1000) || this.state.funds <= 0}
               onClick={() => { this.withdraw_funds() }}
               >Withdraw funds</Button></div><br/>
@@ -91,7 +94,7 @@ export default class OwnedEvent extends Component {
 
             <div><Button
               variant="contained"
-              color="primary"
+              color="secondary"
               onClick={() => { this.get_customer_list() }}
               >Load customer list</Button></div>
 
@@ -169,8 +172,8 @@ export default class OwnedEvent extends Component {
   }
 
   get_color(activator) {
-    if (activator) return "primary" 
-    else return "secondary";
+    if (activator) return "secondary" 
+    else return "primary";
   }
 
   handleActivateSale = async (activator) => {
@@ -279,7 +282,7 @@ export class AddTickets extends Component {
             )}
             <Button
               variant="contained"
-              color="primary"
+              color="secondary"
               onClick={() => { this.submit() }}
               >Add</Button>
           </FormControl>
@@ -349,6 +352,7 @@ export class ChangePrices extends Component {
 
             <Button
               variant="contained"
+              color="secondary"
               onClick={() => { this.submit() }}
               disabled={this.state.button_state}
               >Change price</Button>

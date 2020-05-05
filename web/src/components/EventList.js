@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 import EventListItem from './EventListItem.js'
-import './EventList.css';
+import './ExpansionPanel.css';
 
 export default class EventList extends Component {
 

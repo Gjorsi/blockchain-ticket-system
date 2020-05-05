@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  background-color: #262626
 }
 
 .App-logo {
@@ -19,4 +20,9 @@
 
 .App-link {
   color: #09d3ac;
+}
+
+.Tabs {
+  background-color: #2fc4b5;
+  color: #000000;
 }
