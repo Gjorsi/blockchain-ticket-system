@@ -72,8 +72,13 @@ function SimpleBackdrop() {
 class App extends Component {
   state = { web3: null, accounts: null, contract: null, activeTab: 3, pending: [], confirmed: [] };
 
+  accountChangeCheck = setInterval( async () => {
+    if (this.state.web3.eth.accounts[0] !== this.state.accounts[0]) {
+      this.setState({accounts: await this.state.web3.eth.getAccounts()});
+    }
+  }, 500);
+
   componentDidMount = async () => {
-    console.log(window.innerWidth);
     try {
       // Get network provider and web3 instance.
       const web3 = await getWeb3();
