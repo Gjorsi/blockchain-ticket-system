@@ -73,6 +73,7 @@ class App extends Component {
   state = { web3: null, accounts: null, contract: null, activeTab: 3, pending: [], confirmed: [] };
 
   componentDidMount = async () => {
+    console.log(window.innerWidth);
     try {
       // Get network provider and web3 instance.
       const web3 = await getWeb3();
@@ -194,16 +195,15 @@ class App extends Component {
           })}
           <Tabs
             value={this.state.activeTab}
-            indicatorColor="primary"
-            textColor="primary"
+            indicatorColor="secondary"
             centered={true}
             onChange={this.changeTab}
             aria-label="simple tabs example"
           >
-            <Tab label="Browse events" {...tabProps(0)} />
+            <Tab label="Browse" {...tabProps(0)} />
             <Tab label="My tickets" {...tabProps(1)} />
             <Tab label="My events" {...tabProps(2)} />
-            <Tab label="Create event" {...tabProps(3)} />
+            <Tab label="Create" {...tabProps(3)} />
           </Tabs>
         </AppBar>
         <TabPanel value={this.state.activeTab} index={0}>
