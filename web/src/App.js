@@ -18,10 +18,10 @@ const colors = {white: "#ffffff", black: "#000000", teal: "#2fc4b5", grey: "#7a7
   dark_grey: "#363636", orange: "#e85623"};
 
 const theme = createMuiTheme({
+  
   palette: {
     primary: {
       main: colors.white,
-      contrastText: colors.black,
     },
     secondary: {
       main: colors.teal,
@@ -86,7 +86,7 @@ const theme = createMuiTheme({
         color: colors.light_grey,
       }
     }
-}
+  }
 });
 
 const PendingButton = styled(Button)`
@@ -137,8 +137,7 @@ function SimpleBackdrop() {
     <div>
       <Backdrop  open={true}>
         <FormControl>
-          <CircularProgress color="inherit" />
-          Loading contract data...
+          <CircularProgress color="secondary" />
         </FormControl>
       </Backdrop>
     </div>
@@ -146,7 +145,7 @@ function SimpleBackdrop() {
 }
 
 class App extends Component {
-  state = { web3: null, accounts: null, contract: null, activeTab: 3, pending: [], confirmed: [] };
+  state = { web3: null, accounts: null, contract: null, activeTab: 0, pending: [], confirmed: [] };
 
   accountChangeCheck = setInterval( async () => {
     if (this.state.web3 && this.state.web3.eth.accounts[0] !== this.state.accounts[0]) {
@@ -246,7 +245,10 @@ class App extends Component {
   render() {
 
     if (!this.state.web3 || !this.state.events) {
-      return <SimpleBackdrop/>;
+      return (
+        <ThemeProvider theme={theme}>
+          <SimpleBackdrop/>;
+        </ThemeProvider> );
     }
 
     return (
