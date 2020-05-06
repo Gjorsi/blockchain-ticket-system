@@ -28,7 +28,9 @@ const theme = createMuiTheme({
     },
     error: {
       main: colors.orange,
-
+    },
+    background: {
+      main: colors.dark_grey,
     },
     text: {
       primary: colors.white,
@@ -65,8 +67,26 @@ const theme = createMuiTheme({
           borderColor: colors.grey,
         },
       }
+    },
+
+    MuiPickersBasePicker:{
+      pickerView:{
+        backgroundColor:colors.dark_grey,
+      }
+    },
+
+    MuiPickersCalendarHeader: {
+      dayLabel: {
+        color: colors.light_grey,
+      },
+    },
+
+    MuiSvgIcon: {
+      root: {
+        color: colors.light_grey,
+      }
     }
-  }
+}
 });
 
 const PendingButton = styled(Button)`
@@ -129,7 +149,7 @@ class App extends Component {
   state = { web3: null, accounts: null, contract: null, activeTab: 3, pending: [], confirmed: [] };
 
   accountChangeCheck = setInterval( async () => {
-    if (this.state.web3.eth.accounts[0] !== this.state.accounts[0]) {
+    if (this.state.web3 && this.state.web3.eth.accounts[0] !== this.state.accounts[0]) {
       this.setState({accounts: await this.state.web3.eth.getAccounts()});
     }
   }, 500);

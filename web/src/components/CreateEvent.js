@@ -88,16 +88,14 @@ export default class CreateEvent extends Component {
               margin="normal"
               label="Choose a deadline date"
               value={this.state.deadline}
-              onChange={d => this.update_deadline(d)}
-            />
-	    <KeyboardTimePicker
+              onChange={d => this.update_deadline(d)}/>
+	      <KeyboardTimePicker
               margin="normal"
               id="time-picker"
               color="secondary"
               label="Choose a deadline time"
               value={this.state.deadline}
-              onChange={d => this.update_deadline(d)}
-            />
+              onChange={d => this.update_deadline(d)}/>
           </MuiPickersUtilsProvider>
         </div>
 

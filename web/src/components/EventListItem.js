@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {TextField, Radio, RadioGroup, FormControl, FormControlLabel, Button } from '@material-ui/core';
+import {TextField, Radio, RadioGroup, FormControl, FormControlLabel, Button, Grid } from '@material-ui/core';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
@@ -14,6 +14,7 @@ export default class EventListItem extends Component {
 
   render() {
     return (
+      
       <ExpansionPanel>
         <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} >
           <Typography className="heading" 
@@ -25,9 +26,11 @@ export default class EventListItem extends Component {
           </Typography>
         </ExpansionPanelSummary>
         <ExpansionPanelDetails className="expansionPanelDetails">
+          <Grid xs={true} style={{textAlign: "center"}}>
           <BuyTicket 
             {...this.props}
           />
+          </Grid>
         </ExpansionPanelDetails>
       </ExpansionPanel>
     );

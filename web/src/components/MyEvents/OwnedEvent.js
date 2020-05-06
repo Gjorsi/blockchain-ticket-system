@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { TextField, ExpansionPanel, ExpansionPanelSummary, Button, Select, FormHelperText, 
 ExpansionPanelDetails, Chip, Avatar, FormControl, MenuItem, List, ListItem, 
-Dialog, DialogTitle, DialogContent, DialogActions} from '@material-ui/core';
+Dialog, DialogTitle, DialogContent, DialogActions, Grid} from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { makeStyles } from "@material-ui/styles";
 
@@ -34,6 +34,7 @@ export default class OwnedEvent extends Component {
           {!!(this.props.event)?bytesToString(this.props.event.title):"loading.."}
         </ExpansionPanelSummary>
         <ExpansionPanelDetails>
+        <Grid xs={true} style={{textAlign: "center"}}>
           <FormControl>
             <Chip
               avatar={<Avatar>S</Avatar>}
@@ -117,6 +118,7 @@ export default class OwnedEvent extends Component {
               >Delete Event</Button></div>
 
           </FormControl>
+          </Grid>
         </ExpansionPanelDetails>
       </ExpansionPanel>
 
