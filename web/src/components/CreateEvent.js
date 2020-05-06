@@ -115,7 +115,7 @@ export default class CreateEvent extends Component {
             {this.state.error_message}
           </DialogContent>
           <DialogActions>
-            <Button onClick={this.handle_close_error}>
+            <Button onClick={this.handle_close_error} color="secondary">
               Close
             </Button>
           </DialogActions>

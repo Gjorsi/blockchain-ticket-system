@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import EventContract from "./contracts/EventContract.json";
 import getWeb3 from "./getWeb3";
+import Web3 from 'web3';
 import PropTypes from 'prop-types';
 import Box from '@material-ui/core/Box';
 import styled from 'styled-components';
@@ -85,6 +86,13 @@ const theme = createMuiTheme({
       root: {
         color: colors.light_grey,
       }
+    },
+
+    MuiDialog: {
+      paper: {
+        backgroundColor: colors.dark_grey,
+        color: colors.white,
+      }
     }
   }
 });
@@ -144,22 +152,40 @@ function SimpleBackdrop() {
   );
 }
 
+
+
 class App extends Component {
-  state = { web3: null, accounts: null, contract: null, activeTab: 0, pending: [], confirmed: [] };
+  state = { web3: null, accounts: null, contract: null, activeTab: 0, pending: [], confirmed: []};
 
   accountChangeCheck = setInterval( async () => {
-    if (this.state.web3 && this.state.web3.eth.accounts[0] !== this.state.accounts[0]) {
+    if (this.state.web3 && this.state.accounts && this.state.web3.eth.accounts[0] !== this.state.accounts[0]) {
       this.setState({accounts: await this.state.web3.eth.getAccounts()});
     }
-  }, 500);
+  }, 1000);
 
   componentDidMount = async () => {
+    /*window.addEventListener('load', async () => {
+      if (window.ethereum) {
+        try {
+          // Get network provider and web3 instance.
+          const web3 = window.ethereum;
+          this.setState({web3: web3});
+        } catch (error) {
+          console.log(error.message);
+        }
+      }
+    });*/
+
     try {
       // Get network provider and web3 instance.
-      const web3 = await getWeb3();
-
-      // Use web3 to get the user's accounts.
-      const accounts = await web3.eth.getAccounts();
+      let web3 = null;
+      if (window.web3) {
+        web3 = new Web3(window.web3.currentProvider);
+      } else if (window.ethereum) {
+        web3 = new Web3(window.thereum);
+      } else {
+        web3 = await getWeb3();
+      }
 
       // Get the contract instance.
       const networkId = await web3.eth.net.getId();
@@ -169,10 +195,13 @@ class App extends Component {
         deployedNetwork.address
       );
 
+      // check for web3 provider
+    
+
       instance.options.handleRevert = true;
 
       // Set web3, accounts, and contract to the state
-      this.setState({ web3, accounts, contract: instance});
+      this.setState({ web3, contract: instance});
 
       // load list of event IDs
       await this.load_event_list();
@@ -190,9 +219,6 @@ class App extends Component {
 
     } catch (error) {
       // Catch any errors for any of the above operations.
-      alert(
-        `Failed to load web3, accounts, or contract. Check console for details.`,
-      );
       console.error(error);
     }
   };
