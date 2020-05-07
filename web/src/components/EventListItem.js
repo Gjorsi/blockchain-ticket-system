@@ -26,7 +26,7 @@ export default class EventListItem extends Component {
           </Typography>
         </ExpansionPanelSummary>
         <ExpansionPanelDetails className="expansionPanelDetails">
-          <Grid xs={true} style={{textAlign: "center"}}>
+          <Grid item xs={true} style={{textAlign: "center"}}>
           <BuyTicket 
             {...this.props}
           />

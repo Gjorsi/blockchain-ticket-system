@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import {TextField, ExpansionPanel, ExpansionPanelSummary, Button, 
-ExpansionPanelDetails, FormControl, List, ListItem } from '@material-ui/core';
+ExpansionPanelDetails, FormControl, List, ListItem, Grid } from '@material-ui/core';
 
 import { bytesToString } from '../../util/conversion.js';
 
@@ -25,6 +25,7 @@ export default class TicketView extends Component {
           {!!(this.props.event)?bytesToString(this.props.event.title):"loading.."}
         </ExpansionPanelSummary>
         <ExpansionPanelDetails>
+          <Grid item xs={true} style={{textAlign: "center"}}>
           <FormControl>
             
             {!!(this.state.tickets) ? this.list_tickets() : "loading.."}
@@ -42,6 +43,7 @@ export default class TicketView extends Component {
               onClick={() => { this.return_tickets() }}
               >{!this.can_return_tickets() ? "Return All Tickets" : "Ticket return is disabled"}</Button>
           </FormControl>
+          </Grid>
         </ExpansionPanelDetails>
       </ExpansionPanel>
     );

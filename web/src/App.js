@@ -6,7 +6,8 @@ import PropTypes from 'prop-types';
 import Box from '@material-ui/core/Box';
 import styled from 'styled-components';
 import { green, orange } from '@material-ui/core/colors';
-import { Button, Typography, AppBar, Tabs, Tab, Backdrop, CircularProgress, FormControl } from '@material-ui/core';
+import { Button, Typography, AppBar, Tabs, Tab, Backdrop, CircularProgress, FormControl, 
+  Grid, ButtonGroup, Dialog, DialogTitle, DialogContent, DialogActions } from '@material-ui/core';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 
 import "./App.css";
@@ -155,7 +156,14 @@ function SimpleBackdrop() {
 
 
 class App extends Component {
-  state = { web3: null, accounts: null, contract: null, activeTab: 0, pending: [], confirmed: []};
+  state = { 
+    web3: null, 
+    accounts: null, 
+    contract: null, 
+    activeTab: 0, 
+    pending: [], 
+    confirmed: [],
+    failed_metamask: false};
 
   accountChangeCheck = setInterval( async () => {
     if (this.state.web3 && this.state.accounts && this.state.web3.eth.accounts[0] !== this.state.accounts[0]) {
@@ -179,10 +187,10 @@ class App extends Component {
     try {
       // Get network provider and web3 instance.
       let web3 = null;
-      if (window.web3) {
+      if (window.ethereum) {
+        web3 = new Web3(window.ethereum);
+      } else if (window.web3) {
         web3 = new Web3(window.web3.currentProvider);
-      } else if (window.ethereum) {
-        web3 = new Web3(window.thereum);
       } else {
         web3 = await getWeb3();
       }
@@ -194,9 +202,6 @@ class App extends Component {
         EventContract.abi,
         deployedNetwork.address
       );
-
-      // check for web3 provider
-    
 
       instance.options.handleRevert = true;
 
@@ -222,6 +227,19 @@ class App extends Component {
       console.error(error);
     }
   };
+
+  connect_metamask = async () => {
+    try {
+      const web3 = new Web3(window.ethereum);
+      const accounts = await window.ethereum.enable();
+
+      this.setState({web3: web3, accounts: accounts});
+
+    } catch (error) {
+      console.log(error.message);
+      this.setState({failed_metamask: true});
+    }
+  }
 
   load_event_list = async () => {
     let event_list = await this.state.contract.methods.get_events().call();
@@ -268,6 +286,10 @@ class App extends Component {
     this.setState({ pending: [...this.state.pending, (id)] });
   }
 
+  handle_close_error = async () => {
+    await this.setState({failed_metamask: false});
+  }
+
   render() {
 
     if (!this.state.web3 || !this.state.events) {
@@ -280,6 +302,15 @@ class App extends Component {
     return (
       <ThemeProvider theme={theme}>
       <div className="App">
+        <Dialog open={this.state.failed_metamask} onClose={this.handle_close_error}>
+          <DialogTitle>Failed to connect</DialogTitle>
+          <DialogContent>Connection to MetaMask account failed. Is MetaMask installed?</DialogContent>
+          <DialogActions>
+            <Button onClick={this.handle_close_error} color="secondary">
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
         <AppBar position="static">
           {this.state.pending.map((tx) => {
             let short = tx.substring(0,15) + '...';
@@ -311,11 +342,12 @@ class App extends Component {
             aria-label="simple tabs example"
           >
             <Tab label="Browse" {...tabProps(0)} />
-            <Tab label="My tickets" {...tabProps(1)} />
-            <Tab label="My events" {...tabProps(2)} />
-            <Tab label="Create" {...tabProps(3)} />
+            <Tab label="My tickets" disabled={!this.state.accounts} {...tabProps(1)} />
+            <Tab label="My events" disabled={!this.state.accounts} {...tabProps(2)} />
+            <Tab label="Create" disabled={!this.state.accounts} {...tabProps(3)} />
           </Tabs>
         </AppBar>
+        {this.login_bar()}
         <TabPanel value={this.state.activeTab} index={0}>
           <BrowseEvents 
             contract={this.state.contract} 
@@ -361,9 +393,26 @@ class App extends Component {
               add_pending_tx={this.add_pending_tx}
               colors={this.colors}/>
         </TabPanel>
-
       </div>
       </ThemeProvider>
+    );
+  }
+
+  login_bar() {
+    if (!this.state.accounts) return (
+      <Grid item xs={true} style={{textAlign: "center"}}>
+        <ButtonGroup color="secondary">
+          <Button 
+            variant="outlined"
+            onClick={() => this.connect_metamask()}
+            >Connect with MetaMask</Button>
+          <Button 
+            variant="outlined"
+            href="https://metamask.io"
+            target="_blank"
+            >Get MetaMask</Button>
+          </ButtonGroup>
+      </Grid>
     );
   }
 }

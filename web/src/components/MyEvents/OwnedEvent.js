@@ -34,7 +34,7 @@ export default class OwnedEvent extends Component {
           {!!(this.props.event)?bytesToString(this.props.event.title):"loading.."}
         </ExpansionPanelSummary>
         <ExpansionPanelDetails>
-        <Grid xs={true} style={{textAlign: "center"}}>
+        <Grid item xs={true} style={{textAlign: "center"}}>
           <FormControl>
             <Chip
               avatar={<Avatar>S</Avatar>}
