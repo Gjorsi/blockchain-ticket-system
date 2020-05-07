@@ -34,7 +34,7 @@ export default class MyEvents extends Component {
             reload_event={this.props.reload_event}
             delete_event={this.props.delete_event}
             add_pending_tx={this.props.add_pending_tx}
-            confirm={this.props.confirm}
+            add_confirmed_tx={this.props.add_confirmed_tx}
             web3={this.props.web3}/>
         )}
       </div>

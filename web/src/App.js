@@ -5,7 +5,7 @@ import Web3 from 'web3';
 import PropTypes from 'prop-types';
 import Box from '@material-ui/core/Box';
 import styled from 'styled-components';
-import { green, orange } from '@material-ui/core/colors';
+import { green, orange, red } from '@material-ui/core/colors';
 import { Button, Typography, AppBar, Tabs, Tab, Backdrop, CircularProgress, FormControl, 
   Grid, ButtonGroup, Dialog, DialogTitle, DialogContent, DialogActions } from '@material-ui/core';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
@@ -110,6 +110,11 @@ const ConfirmedButton = styled(Button)`
   background-color: ${green[200]};
 `;
 
+const FailedButton = styled(Button)`
+  text-transform: none;
+  background-color: ${red[200]};
+`;
+
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -161,8 +166,9 @@ class App extends Component {
     accounts: null, 
     contract: null, 
     activeTab: 0, 
-    pending: [], 
-    confirmed: [],
+    pending_tx: [], 
+    confirmed_tx: [],
+    failed_tx: [],
     failed_metamask: false};
 
   accountChangeCheck = setInterval( async () => {
@@ -275,15 +281,26 @@ class App extends Component {
     this.setState({ activeTab: value });
   }
 
-  confirm = async (tx) => {
-    let pending = this.state.pending;
+  add_confirmed_tx = async (tx, receipt) => {
+    let pending = this.state.pending_tx;
     pending.splice(pending.indexOf(tx), 1);
-    this.setState({ pending: pending });
-    this.setState({ confirmed: [...this.state.confirmed, tx] });
+    this.setState({ pending_tx: pending });
+    if(receipt.status){
+        this.setState({ confirmed_tx: [...this.state.confirmed_tx, tx] });
+    } else {
+        this.setState({ failed_tx: [...this.state.failed_tx, tx] });
+    }
+  }
+
+  add_failed_tx = async (tx) => {
+    let pending = this.state.pending_tx;
+    pending.splice(pending.indexOf(tx), 1);
+    this.setState({ pending_tx: pending });
+    this.setState({ failed_tx: [...this.state.failed_tx, tx] });
   }
 
   add_pending_tx = async (id) => {
-    this.setState({ pending: [...this.state.pending, (id)] });
+    this.setState({ pending_tx: [...this.state.pending_tx, (id)] });
   }
 
   handle_close_error = async () => {
@@ -312,25 +329,42 @@ class App extends Component {
           </DialogActions>
         </Dialog>
         <AppBar position="static">
-          {this.state.pending.map((tx) => {
+          {this.state.pending_tx.map((tx) => {
             let short = tx.substring(0,15) + '...';
             return (
               <PendingButton 
                 variant="contained"
+                onClick={() => {
+                  navigator.clipboard.writeText(tx);
+                  alert('Transaction id copied to clipboard!');
+                }}
               >Transaction with id {short} is pending</PendingButton>
             );
           })}
-          {this.state.confirmed.map((tx) => {
+          {this.state.confirmed_tx.map((tx) => {
             let short = tx.substring(0,15) + '...';
             return (
               <ConfirmedButton 
                 variant="contained"
                 onClick={() => {
-                  let conf = this.state.confirmed;
+                  let conf = this.state.confirmed_tx;
                   conf.splice(conf.indexOf(tx), 1);
-                  this.setState({ confirmed: conf });
+                  this.setState({ confirmed_tx: conf });
                 }}
               >Transaction with id {short} has been confirmed! Click to dismiss.</ConfirmedButton>
+            );
+          })}
+          {this.state.failed_tx.map((tx) => {
+            let short = tx.substring(0,15) + '...';
+            return (
+              <FailedButton 
+                variant="contained"
+                onClick={() => {
+                  let failed = this.state.failed_tx;
+                  failed.splice(failed.indexOf(tx), 1);
+                  this.setState({ failed_tx: failed });
+                }}
+              >Transaction with id {short} failed. Click to dismiss.</FailedButton>
             );
           })}
           <Tabs
@@ -355,7 +389,8 @@ class App extends Component {
             event_list={this.state.event_list}
             events={this.state.events}
             reload_event={this.reload_event}
-            confirm={this.confirm}
+            add_confirmed_tx={this.add_confirmed_tx}
+            add_failed_tx={this.add_failed_tx}
             add_pending_tx={this.add_pending_tx}
             web3={this.state.web3}/>
         </TabPanel>
@@ -365,7 +400,8 @@ class App extends Component {
               accounts={this.state.accounts} 
               contract={this.state.contract}
               reload_event={this.reload_event}
-              confirm={this.confirm}
+              add_failed_tx={this.add_failed_tx}
+              add_confirmed_tx={this.add_confirmed_tx}
               add_pending_tx={this.add_pending_tx}
               events={this.state.events}/>
         </TabPanel>
@@ -378,7 +414,8 @@ class App extends Component {
               events={this.state.events}
               reload_event={this.reload_event}
               delete_event={this.delete_event}
-              confirm={this.confirm}
+              add_confirmed_tx={this.add_confirmed_tx}
+              add_failed_tx={this.add_failed_tx}
               add_pending_tx={this.add_pending_tx}
               web3={this.state.web3}/>
         </TabPanel>
@@ -389,7 +426,8 @@ class App extends Component {
               web3={this.state.web3} 
               accounts={this.state.accounts} 
               contract={this.state.contract}
-              confirm={this.confirm}
+              add_confirmed_tx={this.add_confirmed_tx}
+              add_failed_tx={this.add_failed_tx}
               add_pending_tx={this.add_pending_tx}
               colors={this.colors}/>
         </TabPanel>

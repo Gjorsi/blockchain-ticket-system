@@ -88,7 +88,7 @@ export class BuyTicket extends Component {
         })
         .on('confirmation', (num, receipt) => {
           if(num == 0){
-            this.props.confirm(receipt.transactionHash);
+            this.props.add_confirmed_tx(receipt.transactionHash, receipt);
           }
         });
       this.props.reload_event(this.props.eventId); //call to App.js to reload affected event
