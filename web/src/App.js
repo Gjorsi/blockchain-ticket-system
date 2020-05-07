@@ -186,14 +186,8 @@ class App extends Component {
 
     try {
       // Get network provider and web3 instance.
-      let web3 = null;
-      if (window.ethereum) {
-        web3 = new Web3(window.ethereum);
-      } else if (window.web3) {
-        web3 = new Web3(window.web3.currentProvider);
-      } else {
-        web3 = await getWeb3();
-      }
+      
+      let web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io/v3/5c214d15dc4145778640005163a91851"));
 
       // Get the contract instance.
       const networkId = await web3.eth.net.getId();
@@ -206,7 +200,7 @@ class App extends Component {
       instance.options.handleRevert = true;
 
       // Set web3, accounts, and contract to the state
-      this.setState({ web3, contract: instance});
+      this.setState({ web3: web3, contract: instance});
 
       // load list of event IDs
       await this.load_event_list();
@@ -231,12 +225,31 @@ class App extends Component {
   connect_metamask = async () => {
     try {
       const web3 = new Web3(window.ethereum);
-      const accounts = await window.ethereum.enable();
+      const accounts = await web3.eth.getAccounts();
+
+      // Get the contract instance.
+      const networkId = await web3.eth.net.getId();
+      const deployedNetwork = EventContract.networks[networkId];
+      const instance = new web3.eth.Contract(
+        EventContract.abi,
+        deployedNetwork.address
+      );
+
+      instance.options.handleRevert = true;
+
+      // Set web3, accounts, and contract to the state
+      this.setState({ web3: web3, contract: instance});
 
       this.setState({web3: web3, accounts: accounts});
 
+      // load list of event IDs
+      await this.load_event_list();
+
+      // cache all events
+      await this.load_events();
+
     } catch (error) {
-      console.log(error.message);
+      console.log(error);
       this.setState({failed_metamask: true});
     }
   }

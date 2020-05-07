@@ -9,12 +9,14 @@ export default class EventList extends Component {
     return(
       <div>
         {this.props.event_list.map(e =>
-          <EventListItem 
-            key={e}
-            eventId={e}
-            event={this.props.events.get(e)}
-            {...this.props}
-          />
+          {if (this.props.events.has(e)) {
+            return(<EventListItem 
+              key={e}
+              eventId={e}
+              event={this.props.events.get(e)}
+              {...this.props}
+            />)
+          }}
         )}
       </div>
     )
