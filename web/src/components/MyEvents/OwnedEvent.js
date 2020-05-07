@@ -159,7 +159,7 @@ export default class OwnedEvent extends Component {
         })
         .on('confirmation', (num, receipt) => {
           if(num == 0){
-            this.props.confirm(receipt.transactionHash);
+            this.props.add_confirmed_tx(receipt.transactionHash, receipt);
           }
         });
       await this.setState({
@@ -187,7 +187,7 @@ export default class OwnedEvent extends Component {
         })
         .on('confirmation', (num, receipt) => {
           if(num == 0){
-            this.props.confirm(receipt.transactionHash);
+            this.props.add_confirmed_tx(receipt.transactionHash, receipt);
           }
         });
       } else {
@@ -197,7 +197,7 @@ export default class OwnedEvent extends Component {
         })
         .on('confirmation', (num, receipt) => {
           if(num == 0){
-            this.props.confirm(receipt.transactionHash);
+            this.props.add_confirmed_tx(receipt.transactionHash, receipt);
           }
         });
       }
@@ -233,7 +233,7 @@ export default class OwnedEvent extends Component {
         })
         .on('confirmation', (num, receipt) => {
           if(num == 0){
-            this.props.confirm(receipt.transactionHash);
+            this.props.add_confirmed_tx(receipt.transactionHash, receipt);
           }
         });
 
@@ -304,7 +304,7 @@ export class AddTickets extends Component {
         })
         .on('confirmation', (num, receipt) => {
           if(num == 0){
-            this.props.confirm(receipt.transactionHash);
+            this.props.add_confirmed_tx(receipt.transactionHash, receipt);
           }
         });
       this.props.reload_event(this.props.eventId); //call to App.js to reload affected event
@@ -381,7 +381,7 @@ export class ChangePrices extends Component {
         })
         .on('confirmation', (num, receipt) => {
           if(num == 0){
-            this.props.confirm(receipt.transactionHash);
+            this.props.add_confirmed_tx(receipt.transactionHash, receipt);
           }
         });
       this.props.reload_event(this.props.eventId); //call to App.js to reload affected event

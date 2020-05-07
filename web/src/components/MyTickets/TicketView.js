@@ -75,7 +75,7 @@ export default class TicketView extends Component {
         })
         .on('confirmation', (num, receipt) => {
           if(num == 0){
-            this.props.confirm(receipt.transactionHash);
+            this.props.add_confirmed_tx(receipt.transactionHash, receipt);
           }
         });
       this.load_tickets();
