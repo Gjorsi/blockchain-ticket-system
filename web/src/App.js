@@ -230,6 +230,7 @@ class App extends Component {
 
   connect_metamask = async () => {
     try {
+      await window.ethereum.enable();
       const web3 = new Web3(window.ethereum);
       const accounts = await web3.eth.getAccounts();
 

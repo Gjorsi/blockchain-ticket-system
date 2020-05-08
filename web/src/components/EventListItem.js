@@ -143,7 +143,10 @@ export class BuyTicket extends Component {
         <Button
           variant="contained"
           color="secondary"
-          disabled={!this.state.button_state || !this.props.event.sale_active || Date.now() >= this.props.event.deadline*1000}
+          disabled={!this.state.button_state || 
+            !this.props.event.sale_active || 
+            Date.now() >= this.props.event.deadline*1000 || 
+            !this.props.accounts}
           onClick={this.buyTickets}
         > Buy tickets
         </Button>
