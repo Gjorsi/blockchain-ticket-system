@@ -151,7 +151,7 @@ contract EventContract {
     event_id_list.length--;
   }
 
-// ----- Public functions -----
+// ----- Customer functions -----
 
   function buy_tickets(bytes32 event_id, uint64 ticket_type, uint64 requested_num_tickets) external payable beforeDeadline(event_id) {
     require(requested_num_tickets > 0);
@@ -213,6 +213,8 @@ contract EventContract {
     (bool success, ) = msg.sender.call.value(return_amount)("");
     require(success, "Return transfer to customer failed.");
   }
+
+// ----- View functions -----
 
   function get_event_info(bytes32 event_id) external view eventExists(event_id) returns (
     bytes32 id,
