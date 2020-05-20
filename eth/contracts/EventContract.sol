@@ -4,7 +4,7 @@ contract EventContract {
   // Mapping from event id to event
   mapping(bytes32 => Event) public events;
   bytes32[] public event_id_list;
-  uint8 public max_ticket_types = 100;
+  uint8 constant public max_ticket_types = 100;
   mapping(address => bytes32[]) public participation;
 
   struct Event { // attempt strict packaging
