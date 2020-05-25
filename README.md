@@ -1,6 +1,8 @@
 # Blockchain Ticket System
 This project is an Ethereum-based smart contract ticket sale system. 
 
+The contract has been deployed to the Ropsten public test network and the web app is currently hosted through Github Pages. Access the web app [here](https://gjorsi.github.io/blockchain-ticket-system), where you can view the content on the Ropsten network or, if you have MetaMask installed, you can connect to the Ropsten network and create events / buy tickets etc. To get ETH for testing on Ropsten, you can access this [faucet](https://faucet.metamask.io/).
+
 The repo contains the contract, compiled with Solidity 0.5.12, and a web app using React and Web3.js. 
 
 ## Security considerations
